@@ -1,0 +1,61 @@
+{
+  "hash": "733b669b",
+  "configHash": "3181ce87",
+  "lockfileHash": "a768b094",
+  "browserHash": "3d40c78f",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/.pnpm/react@18.3.1/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "a94028d6",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/.pnpm/react@18.3.1/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "31747c5a",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "5eb6d371",
+      "needsInterop": true
+    },
+    "@tauri-apps/api/core": {
+      "src": "../../node_modules/.pnpm/@tauri-apps+api@2.8.0/node_modules/@tauri-apps/api/core.js",
+      "file": "@tauri-apps_api_core.js",
+      "fileHash": "210a9265",
+      "needsInterop": false
+    },
+    "lucide-react": {
+      "src": "../../node_modules/.pnpm/lucide-react@0.469.0_react@18.3.1/node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "da061ebb",
+      "needsInterop": false
+    },
+    "@tauri-apps/plugin-dialog": {
+      "src": "../../node_modules/.pnpm/@tauri-apps+plugin-dialog@2.3.3/node_modules/@tauri-apps/plugin-dialog/dist-js/index.js",
+      "file": "@tauri-apps_plugin-dialog.js",
+      "fileHash": "ebc52e4d",
+      "needsInterop": false
+    },
+    "@tauri-apps/plugin-clipboard-manager": {
+      "src": "../../node_modules/.pnpm/@tauri-apps+plugin-clipboard-manager@2.3.0/node_modules/@tauri-apps/plugin-clipboard-manager/dist-js/index.js",
+      "file": "@tauri-apps_plugin-clipboard-manager.js",
+      "fileHash": "5cd3598e",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-OELA7GPI": {
+      "file": "chunk-OELA7GPI.js"
+    },
+    "chunk-L5MUIIQ4": {
+      "file": "chunk-L5MUIIQ4.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}

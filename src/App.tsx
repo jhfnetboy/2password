@@ -112,7 +112,7 @@ function App() {
   }
 
   if (!isVaultLoaded) {
-    return <VaultSetup onVaultLoaded={handleVaultLoaded} touchIdAvailable={touchIdAvailable} />;
+    return <VaultSetup onVaultLoaded={handleVaultLoaded} />;
   }
 
   return (
