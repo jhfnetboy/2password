@@ -1,3 +1,6 @@
 [submodule "claude-task-master"]
 	path = claude-task-master
 	url = https://github.com/eyaltoledano/claude-task-master
+[submodule "tools/rust-taskmaster"]
+	path = tools/rust-taskmaster
+	url = https://github.com/jhfnetboy/rust-taskmaster.git
