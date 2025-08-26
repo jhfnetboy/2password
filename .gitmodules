@@ -1,0 +1,3 @@
+[submodule "claude-task-master"]
+	path = claude-task-master
+	url = https://github.com/eyaltoledano/claude-task-master

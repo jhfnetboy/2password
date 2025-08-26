@@ -1,0 +1,587 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "项目基础设施搭建",
+        "description": "创建Rust项目结构，配置开发环境和依赖项",
+        "details": "使用cargo init创建新的Rust项目，配置Cargo.toml包含必要的依赖项如tokio、serde、clap、ring、webauthn-rs等。设置项目目录结构包含src/main.rs、src/lib.rs、src/crypto/、src/cli/、src/storage/等模块。配置开发工具如rustfmt、clippy，设置CI/CD基础配置。创建.gitignore忽略target/、.env等文件。",
+        "testStrategy": "验证cargo build成功编译，cargo test运行通过，所有依赖项正确解析",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "初始化Cargo项目",
+            "description": "使用cargo init创建新的Rust项目并验证基本结构",
+            "dependencies": [],
+            "details": "运行cargo init命令创建新项目，验证生成的Cargo.toml和src/main.rs文件。确保项目可以使用cargo build成功编译hello world程序。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "配置项目依赖",
+            "description": "在Cargo.toml中添加所有必要的依赖项",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "配置Cargo.toml添加tokio、serde、clap、ring、webauthn-rs、objc、core-foundation、zeroize等依赖项。设置正确的版本号和特性标志。运行cargo check验证依赖解析成功。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "创建项目目录结构",
+            "description": "建立标准的模块化目录结构",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "创建src/lib.rs、src/crypto/mod.rs、src/cli/mod.rs、src/storage/mod.rs等目录和文件。在main.rs中添加模块声明。确保每个模块都有基本的pub mod声明和占位符函数。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "配置开发工具",
+            "description": "设置rustfmt、clippy和其他开发工具",
+            "dependencies": [
+              "1.3"
+            ],
+            "details": "创建rustfmt.toml配置文件设置代码格式化规则。配置clippy.toml设置代码检查规则。在Cargo.toml中添加[dev-dependencies]包含开发工具。验证rustfmt和clippy可以正常运行。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "设置CI/CD配置",
+            "description": "创建GitHub Actions或类似的CI/CD配置文件",
+            "dependencies": [
+              "1.4"
+            ],
+            "details": "在.github/workflows/目录创建ci.yml文件，配置自动化测试、代码检查、构建流程。设置多平台构建支持macOS、Linux。配置代码覆盖率报告。验证CI配置语法正确。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "创建环境配置文件",
+            "description": "设置.gitignore、.env.example等环境配置文件",
+            "dependencies": [
+              "1.5"
+            ],
+            "details": "创建.gitignore文件忽略target/、.env、*.log等文件。创建.env.example展示环境变量模板。创建README.md基本项目说明。运行cargo build和cargo test验证整个基础设施配置正确。",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "核心加密模块实现",
+        "description": "实现AES-256-GCM加密解密功能和密钥派生机制",
+        "details": "使用ring库实现AES-256-GCM加密算法。实现PBKDF2密钥派生函数，支持salt生成和存储。创建CryptoManager结构体，提供encrypt()、decrypt()、derive_key()、generate_salt()等方法。实现安全的内存清零机制防止密钥泄露。添加密钥缓存机制，15分钟后自动失效。",
+        "testStrategy": "单元测试验证加密解密往返一致性，测试不同密码的密钥派生结果唯一性，验证内存清零功能，性能测试确保操作在毫秒级完成",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "AES-256-GCM加密实现",
+            "description": "使用ring库实现AES-256-GCM加密和解密功能",
+            "dependencies": [],
+            "details": "实现基础的AES-256-GCM加密算法，包括encrypt()和decrypt()函数。使用ring::aead模块，配置AES_256_GCM算法。处理nonce生成和验证，确保每次加密使用不同的nonce。实现错误处理机制处理加密失败情况。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "PBKDF2密钥派生实现",
+            "description": "实现PBKDF2密钥派生函数支持从密码生成加密密钥",
+            "dependencies": [],
+            "details": "使用ring::pbkdf2模块实现密钥派生功能。配置适当的迭代次数（建议100,000+）平衡安全性和性能。实现derive_key()函数接受密码、salt和迭代次数参数。确保输出32字节密钥适配AES-256要求。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Salt生成和管理",
+            "description": "实现安全的salt生成、存储和管理机制",
+            "dependencies": [],
+            "details": "使用ring::rand::SecureRandom生成密码学安全的随机salt。实现generate_salt()函数产生16字节随机salt。设计salt存储格式和检索机制。确保每个密码库使用唯一salt防止彩虹表攻击。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "CryptoManager结构体设计",
+            "description": "设计和实现CryptoManager核心结构体提供统一加密接口",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3"
+            ],
+            "details": "创建CryptoManager结构体封装所有加密操作。实现new()、encrypt()、decrypt()、derive_key()、generate_salt()等公共方法。设计内部状态管理包括密钥缓存和配置参数。实现Builder模式支持灵活配置。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "安全内存清零机制",
+            "description": "实现安全的内存清零防止密钥和敏感数据泄露",
+            "dependencies": [],
+            "details": "使用zeroize库实现安全内存清零。为所有敏感数据结构实现Zeroize trait。在Drop trait中自动清零敏感内存。实现secure_clear()函数手动清零指定内存区域。确保编译器优化不会移除清零操作。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "密钥缓存机制",
+            "description": "实现带有15分钟自动失效的安全密钥缓存系统",
+            "dependencies": [
+              "2.4",
+              "2.5"
+            ],
+            "details": "设计密钥缓存结构存储派生后的密钥避免重复计算。使用tokio::time实现15分钟超时机制。实现缓存清理任务自动移除过期密钥。添加手动清空缓存功能。确保缓存在程序退出时安全清零。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "密码学错误处理",
+            "description": "实现全面的错误处理和安全失败机制",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3"
+            ],
+            "details": "定义CryptoError枚举涵盖所有可能的加密错误类型。实现From trait支持从ring错误转换。设计错误消息既要有用又要避免泄露敏感信息。实现安全失败模式在错误发生时清零敏感数据。添加错误日志记录机制。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "密码学安全测试",
+            "description": "实现全面的密码学安全测试和验证",
+            "dependencies": [
+              "2.4",
+              "2.6",
+              "2.7"
+            ],
+            "details": "编写单元测试验证加密解密往返一致性。测试密钥派生的确定性和唯一性。实现模糊测试验证异常输入处理。测试内存清零功能确保敏感数据不残留。验证缓存超时机制正确工作。进行性能测试确保操作在毫秒级完成。",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Touch ID集成实现",
+        "description": "集成macOS LocalAuthentication框架实现生物识别验证",
+        "details": "使用objc和core-foundation库调用macOS LocalAuthentication框架。创建TouchIDManager结构体，实现authenticate()、isAvailable()、canEvaluatePolicy()方法。处理Touch ID验证失败、取消、硬件不可用等异常情况。实现验证结果与密钥解锁的安全绑定。添加fallback机制当Touch ID不可用时使用密码验证。",
+        "testStrategy": "在支持Touch ID的设备上测试验证流程，模拟各种失败场景，验证安全绑定机制，测试fallback流程",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "LocalAuthentication框架绑定设置",
+            "description": "设置Objective-C和Core Foundation库绑定，配置LocalAuthentication框架接口",
+            "dependencies": [],
+            "details": "在Cargo.toml中添加objc和core-foundation依赖项。创建LocalAuthentication框架的Rust绑定，包括LAContext、LAPolicy、LAError等核心类型。设置正确的链接器配置以连接系统框架。验证框架可以正确加载和初始化。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "TouchIDManager结构体实现",
+            "description": "创建TouchIDManager核心结构体和基础方法框架",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "定义TouchIDManager结构体，包含LAContext实例和配置参数。实现new()构造函数和基础的内存管理。设置结构体的线程安全机制。创建必要的内部状态管理字段。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "硬件可用性检测方法",
+            "description": "实现isAvailable()和canEvaluatePolicy()方法检测Touch ID硬件支持",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "实现isAvailable()方法检测设备是否支持Touch ID。实现canEvaluatePolicy()方法验证当前策略是否可用。处理不同的硬件配置和系统版本兼容性。返回详细的可用性状态信息。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "身份验证流程实现",
+            "description": "实现authenticate()核心验证方法和异步处理机制",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "实现authenticate()方法调用LAContext的evaluatePolicy。设置合适的提示信息和验证策略。实现异步回调处理机制。确保验证过程的用户体验友好。处理验证成功的结果返回。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "错误处理和异常管理",
+            "description": "实现各种Touch ID验证失败场景的错误处理机制",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "处理Touch ID验证失败、用户取消、硬件不可用等异常情况。实现详细的错误类型映射和用户友好的错误消息。添加重试机制和错误恢复逻辑。确保异常情况下的内存安全。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "安全绑定机制实现",
+            "description": "实现验证结果与密钥解锁的安全绑定机制",
+            "dependencies": [
+              "3.5"
+            ],
+            "details": "建立Touch ID验证成功与密钥访问权限的安全绑定。实现验证状态的安全存储和过期机制。确保绑定过程的密码学安全性。防止绕过验证的攻击向量。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "密码fallback机制",
+            "description": "实现Touch ID不可用时的密码验证fallback机制",
+            "dependencies": [
+              "3.6"
+            ],
+            "details": "当Touch ID不可用或验证失败时，提供密码验证的备用方案。实现用户密码输入界面和验证逻辑。确保fallback机制的安全性等同于Touch ID验证。提供平滑的用户体验切换。",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "密码库存储实现",
+        "description": "实现加密密码库的文件存储和管理功能",
+        "details": "创建VaultManager结构体管理~/.2password/vault.enc文件。实现create_vault()、load_vault()、save_vault()、lock_vault()方法。设计密码条目数据结构包含网站名、用户名、密码、URL、备注、标签、时间戳等字段。实现序列化/反序列化使用serde_json。添加文件完整性校验使用HMAC。实现原子写操作防止数据损坏。",
+        "testStrategy": "测试密码库创建、加载、保存操作，验证文件完整性校验，测试并发访问安全性，验证原子写操作",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "设计VaultManager结构体和密码条目数据结构",
+            "description": "创建VaultManager结构体管理vault.enc文件，定义PasswordEntry数据结构包含所有必要字段",
+            "dependencies": [],
+            "details": "创建VaultManager结构体包含文件路径、锁状态等字段。设计PasswordEntry结构体包含website、username、password、url、notes、tags、created_at、updated_at等字段。实现serde序列化支持。定义VaultData结构体包装密码条目数组。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "实现vault.enc文件路径管理和目录创建",
+            "description": "实现获取~/.2password/vault.enc文件路径，确保目录存在并设置适当权限",
+            "dependencies": [],
+            "details": "实现get_vault_path()方法获取用户主目录下.2password文件夹路径。检查目录是否存在，不存在则创建。设置目录权限为0700确保只有用户可访问。实现错误处理机制处理权限不足或磁盘空间不足等情况。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "实现create_vault()方法创建新密码库",
+            "description": "实现创建新密码库文件的功能，包含初始化空数据结构",
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
+            "details": "实现create_vault()方法创建新的vault.enc文件。初始化空的VaultData结构。实现文件不存在检查避免覆盖现有数据。设置文件权限为0600确保安全。添加创建时间戳和版本信息。实现创建失败时的回滚机制。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "实现load_vault()和save_vault()基础I/O操作",
+            "description": "实现密码库文件的基础读写操作，包含错误处理和数据验证",
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
+            "details": "实现load_vault()方法从文件读取数据并反序列化为VaultData。实现save_vault()方法序列化数据并写入文件。添加文件存在性检查和读写权限验证。实现JSON序列化错误处理。添加数据格式验证确保加载的数据结构正确。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "实现HMAC文件完整性校验机制",
+            "description": "添加HMAC校验确保密码库文件完整性和防止篡改",
+            "dependencies": [
+              "4.4"
+            ],
+            "details": "实现HMAC-SHA256完整性校验。在保存时计算数据HMAC并存储在文件头部。在加载时验证HMAC确保文件未被篡改。实现校验失败时的错误处理和用户提示。设计文件格式包含HMAC头部和加密数据部分。添加版本兼容性检查。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "实现原子写操作和临时文件机制",
+            "description": "实现原子写操作防止数据损坏，使用临时文件和重命名机制",
+            "dependencies": [
+              "4.5"
+            ],
+            "details": "实现原子写操作使用临时文件(.tmp)写入数据然后重命名覆盖原文件。添加写操作失败时的清理机制删除临时文件。实现写操作超时保护避免长时间占用。添加磁盘空间检查确保有足够空间完成写操作。实现写操作的事务性保证全部成功或全部失败。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "实现lock_vault()和并发访问保护机制",
+            "description": "实现密码库锁定功能和多进程并发访问保护",
+            "dependencies": [
+              "4.6"
+            ],
+            "details": "实现lock_vault()方法锁定密码库清空内存中的数据。使用文件锁防止多个进程同时访问密码库。实现进程意外退出时的锁文件清理机制。添加锁超时机制避免死锁。实现内存中敏感数据的安全清零。添加并发访问时的错误提示和重试机制。",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "密码条目管理功能",
+        "description": "实现密码条目的增删改查操作",
+        "details": "创建EntryManager结构体，实现add_entry()、get_entry()、list_entries()、update_entry()、delete_entry()方法。支持模糊搜索匹配网站名称。实现重复条目检测和用户提示。添加软删除功能，deleted entries保存30天。实现条目历史版本管理。支持标签分类和过滤功能。",
+        "testStrategy": "测试所有CRUD操作，验证模糊搜索准确性，测试重复检测逻辑，验证软删除和恢复功能",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "实现EntryManager结构体和基础CRUD操作",
+            "description": "创建EntryManager结构体，实现add_entry()、get_entry()、list_entries()、update_entry()、delete_entry()等基础密码条目管理方法",
+            "dependencies": [],
+            "details": "设计Entry数据结构包含网站名称、用户名、密码、创建时间等字段。实现EntryManager结构体管理密码条目集合。提供标准CRUD操作接口，确保数据一致性和错误处理。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "实现模糊搜索匹配算法",
+            "description": "开发网站名称的模糊搜索功能，支持部分匹配和智能排序",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "实现字符串相似度算法（如Levenshtein距离）。支持前缀匹配、包含匹配和模糊匹配。按匹配度对搜索结果排序。优化搜索性能确保大量条目下快速响应。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "实现重复条目检测和用户提示机制",
+            "description": "开发重复密码条目的检测逻辑，并在添加重复条目时提示用户",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "实现基于网站域名和用户名的重复检测算法。提供用户友好的提示信息询问是否覆盖或创建新条目。支持批量重复检测功能。记录重复检测的决策日志。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "实现软删除功能和30天保留机制",
+            "description": "实现密码条目的软删除功能，被删除条目保存30天后永久删除",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "为Entry结构体添加删除标记和删除时间字段。实现软删除逻辑，标记为删除而不物理删除。提供恢复已删除条目功能。实现定时清理任务，30天后永久删除条目。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "实现条目历史版本管理系统",
+            "description": "开发密码条目的版本控制功能，跟踪和管理条目的历史修改记录",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "设计版本历史数据结构存储条目变更记录。实现版本创建、查看、回滚功能。限制历史版本数量避免存储膨胀。提供版本比较和差异查看功能。",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "实现标签分类和过滤功能",
+            "description": "开发基于标签的密码条目分类和过滤系统",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "为Entry结构体添加标签字段支持多标签。实现标签管理功能包括添加、删除、重命名标签。提供基于标签的过滤和搜索功能。实现标签自动建议和智能分类功能。",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "命令行界面框架",
+        "description": "使用clap构建CLI命令结构和用户交互界面",
+        "details": "使用clap库创建CLI应用，定义所有命令如init、unlock、lock、add、get、list、edit、delete、generate、backup、recover等。实现参数解析和验证。创建交互式UI使用dialoguer库，支持密码输入、选择菜单、确认对话框。实现彩色输出使用colored库。添加进度指示器和状态显示。实现Tab自动补全功能。",
+        "testStrategy": "测试所有命令解析正确，验证交互式UI响应，测试参数验证逻辑，验证帮助文档完整性",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "密码库初始化流程",
+        "description": "实现密码库的首次创建和配置流程",
+        "details": "实现2pass init命令的完整流程。引导用户设置简单主密码（4-20字符验证）。执行Touch ID注册和验证。生成并保存恢复密钥（2-of-3分片方案）。创建加密密码库文件。显示setup成功信息和恢复密钥供用户记录。处理初始化过程中的各种错误情况。",
+        "testStrategy": "端到端测试完整初始化流程，测试各种错误场景处理，验证恢复密钥生成正确性，测试Touch ID集成",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3,
+          4,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "密码库解锁机制",
+        "description": "实现密码库解锁验证和会话管理",
+        "details": "实现2pass unlock命令，支持简单密码+Touch ID双重验证。创建SessionManager管理解锁状态，密钥在内存中保持15分钟。实现失败重试逻辑（3次失败锁定5分钟）。添加系统事件监听器检测睡眠/锁屏自动锁定。实现2pass lock手动锁定命令。确保密钥从内存安全清零。",
+        "testStrategy": "测试解锁验证流程，验证会话超时机制，测试失败重试逻辑，验证系统事件触发锁定，测试内存清零",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3,
+          4,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "密码条目操作命令",
+        "description": "实现add、get、list、edit、delete命令",
+        "details": "实现2pass add命令的交互式添加流程，包含必填和可选字段验证。实现2pass get命令支持模糊搜索和安全显示选项（--password, --copy）。实现2pass list命令的表格显示和过滤功能。实现2pass edit命令的字段选择编辑。实现2pass delete命令的确认和软删除。所有操作需要先验证解锁状态。",
+        "testStrategy": "测试每个命令的完整流程，验证输入验证逻辑，测试安全显示机制，验证剪贴板清理功能",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "密码生成器实现",
+        "description": "实现安全密码生成和强度评估功能",
+        "details": "使用rang::SecureRandom实现密码生成器。实现2pass generate命令支持长度、字符集、排除字符等选项。创建PasswordStrengthEvaluator评估密码强度，包含长度、复杂度、熵值计算。实现常见密码字典检测。添加密码强度可视化显示（1-5星评级）。自动复制生成的密码到剪贴板并30秒后清空。",
+        "testStrategy": "测试密码生成器的随机性和安全性，验证强度评估算法准确性，测试各种生成选项组合",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "备份和恢复系统",
+        "description": "实现密码库备份、导出和灾难恢复功能",
+        "details": "实现2pass backup命令创建加密备份文件。备份内容包含密码库、恢复密钥元数据、配置文件。使用时间戳命名备份文件。实现2pass recover命令支持多种恢复场景：简单密码+恢复密钥、Touch ID+恢复密钥、完整备份文件恢复。创建恢复向导引导用户选择恢复方式。实现恢复后的完整性验证。",
+        "testStrategy": "测试备份文件创建和完整性，验证各种恢复场景，测试恢复向导用户体验，验证恢复后数据完整性",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "错误处理和用户体验优化",
+        "description": "完善错误处理机制和用户界面体验",
+        "details": "创建统一的错误类型和处理机制。实现友好的错误信息显示，提供具体的解决方案建议。添加操作确认对话框防止误操作。实现彩色输出和图标提示增强视觉效果。添加详细的帮助文档和使用示例。实现命令执行进度显示。优化交互响应时间确保在指定性能要求内。",
+        "testStrategy": "测试各种错误场景的处理，验证用户体验流畅性，测试帮助文档完整性，性能基准测试",
+        "priority": "medium",
+        "dependencies": [
+          9,
+          10,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "系统集成和权限管理",
+        "description": "处理macOS系统集成、权限请求和安全配置",
+        "details": "配置Info.plist处理Touch ID权限请求。实现Keychain集成存储敏感配置。添加系统通知功能提醒用户重要操作。实现系统事件监听（睡眠、锁屏、用户切换）。配置代码签名和公证流程。实现最小权限原则，仅请求必要的系统权限。处理沙盒环境下的文件访问权限。",
+        "testStrategy": "测试权限请求流程，验证系统集成功能，测试沙盒环境兼容性，验证代码签名有效性",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "性能优化和内存安全",
+        "description": "优化应用性能并确保内存安全",
+        "details": "使用cargo flamegraph分析性能瓶颈。优化密码库加载和搜索算法。实现延迟加载和缓存机制。使用zeroize库确保敏感数据内存清零。优化二进制文件大小使用strip和lto。实现异步I/O操作提升响应性。添加内存使用监控确保在10MB限制内。优化启动时间达到<100ms要求。",
+        "testStrategy": "性能基准测试验证响应时间要求，内存使用测试，启动时间测试，安全内存清零验证",
+        "priority": "medium",
+        "dependencies": [
+          12
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "全面测试和文档",
+        "description": "完善测试套件、安全审计和用户文档",
+        "details": "编写全面的单元测试覆盖所有模块，目标代码覆盖率>80%。实现集成测试覆盖端到端用户场景。进行安全测试包括密码学实现审计、内存泄露检测、时序攻击防护。使用cargo audit检查依赖项安全性。编写用户手册包含安装、配置、使用指南。创建开发者文档说明架构设计。进行用户验收测试收集反馈。",
+        "testStrategy": "运行完整测试套件验证功能正确性，安全审计通过，用户测试满意度>9/10，文档完整性检查",
+        "priority": "high",
+        "dependencies": [
+          14
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-26T03:41:45.934Z",
+      "updated": "2025-08-26T03:41:45.934Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

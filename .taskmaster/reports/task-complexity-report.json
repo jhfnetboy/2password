@@ -1,0 +1,133 @@
+{
+	"meta": {
+		"generatedAt": "2025-08-26T03:42:50.755Z",
+		"tasksAnalyzed": 15,
+		"totalTasks": 15,
+		"analysisCount": 15,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "项目基础设施搭建",
+			"complexityScore": 4,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the Rust project setup into distinct configuration phases: cargo project initialization, dependency configuration, directory structure creation, development tools setup, CI/CD configuration, and environment files creation. Each subtask should be independently verifiable.",
+			"reasoning": "Moderate complexity involving multiple configuration steps but following standard Rust project patterns. Each configuration area is well-documented with clear success criteria."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "核心加密模块实现",
+			"complexityScore": 8,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Divide the cryptographic implementation into security-focused subtasks: AES-GCM encryption implementation, PBKDF2 key derivation, salt generation and management, CryptoManager structure design, secure memory management, key caching mechanism, error handling, and comprehensive security testing.",
+			"reasoning": "High complexity due to cryptographic security requirements, memory safety concerns, and need for rigorous testing. Cryptographic code requires careful implementation and thorough validation."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Touch ID集成实现",
+			"complexityScore": 7,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Structure the biometric integration by system interaction layers: LocalAuthentication framework binding, TouchIDManager implementation, authentication flow handling, error scenario management, security binding implementation, fallback mechanism, and hardware compatibility testing.",
+			"reasoning": "Significant complexity due to native macOS API integration, Objective-C interop, and various hardware/software failure scenarios that need robust handling."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "密码库存储实现",
+			"complexityScore": 6,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Organize secure storage implementation by data flow: VaultManager structure, file I/O operations, data serialization/deserialization, integrity verification with HMAC, atomic write operations, concurrent access protection, and error recovery mechanisms.",
+			"reasoning": "Moderate-high complexity involving secure file operations, data integrity, and concurrency concerns. Critical for data safety but follows established patterns."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "密码条目管理功能",
+			"complexityScore": 5,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down entry management by operation type: CRUD operations implementation, fuzzy search algorithm, duplicate detection logic, soft delete functionality, version history management, and tag-based categorization system.",
+			"reasoning": "Medium complexity with standard database-like operations. Some algorithmic work needed for search and duplicate detection, but patterns are well-established."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "命令行界面框架",
+			"complexityScore": 5,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Structure CLI development by interface layers: clap command structure, argument parsing and validation, interactive UI components, colored output system, progress indicators, help documentation, and tab completion implementation.",
+			"reasoning": "Medium complexity involving multiple UI libraries and user experience considerations. Well-documented libraries but requires good UX design."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "密码库初始化流程",
+			"complexityScore": 7,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Organize initialization by security stages: master password setup and validation, Touch ID registration process, recovery key generation with secret sharing, vault file creation, success confirmation flow, error handling for each stage, and rollback mechanisms.",
+			"reasoning": "High complexity due to integration of multiple security components, error handling across multiple failure points, and need for atomic initialization process."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "密码库解锁机制",
+			"complexityScore": 6,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down authentication by security layers: dual-factor verification flow, session management with timeout, retry logic with lockout, system event monitoring, manual lock functionality, secure memory cleanup, and authentication state persistence.",
+			"reasoning": "Moderate-high complexity involving security state management, system integration, and multiple authentication factors with proper session handling."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "密码条目操作命令",
+			"complexityScore": 6,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Organize by command implementation: add command with validation, get command with search and display options, list command with filtering, edit command with field selection, delete command with confirmation, clipboard integration, security display mechanisms, and authentication state verification.",
+			"reasoning": "Moderate-high complexity due to multiple command types, security considerations for data display, and clipboard integration requirements."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "密码生成器实现",
+			"complexityScore": 4,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Structure password generation by security components: secure random generation, password strength evaluation algorithm, common password dictionary checking, customizable generation options, and clipboard integration with auto-clear.",
+			"reasoning": "Moderate complexity with standard cryptographic random generation and strength evaluation algorithms. Well-established patterns available."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "备份和恢复系统",
+			"complexityScore": 6,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Organize backup/recovery by data flow: backup file creation with encryption, recovery wizard implementation, multiple recovery scenario handling, file integrity verification, backup metadata management, and recovery process validation.",
+			"reasoning": "Moderate-high complexity involving data serialization, multiple recovery paths, and integrity verification. Critical for data safety but follows standard backup patterns."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "错误处理和用户体验优化",
+			"complexityScore": 5,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Structure UX improvement by interaction layers: unified error type system, user-friendly error messaging, confirmation dialogs, visual enhancement with colors and icons, comprehensive help documentation, and performance optimization for responsiveness.",
+			"reasoning": "Medium complexity focused on user experience and error handling patterns. Requires good design sense but implementation is straightforward."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "系统集成和权限管理",
+			"complexityScore": 7,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down system integration by platform layers: Touch ID permission configuration, Keychain integration, system notifications, system event monitoring, code signing and notarization, minimal privilege implementation, and sandbox compatibility.",
+			"reasoning": "High complexity due to deep macOS system integration, security permissions, and platform-specific requirements including code signing and sandboxing."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "性能优化和内存安全",
+			"complexityScore": 6,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Organize optimization by performance aspects: performance profiling and bottleneck analysis, algorithm optimization for vault operations, caching and lazy loading implementation, secure memory management, binary size optimization, async I/O implementation, and startup time optimization.",
+			"reasoning": "Moderate-high complexity requiring performance analysis skills and optimization techniques. Memory safety in Rust is well-supported but requires careful implementation."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "全面测试和文档",
+			"complexityScore": 7,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Structure testing and documentation by validation layers: comprehensive unit test suite, integration testing scenarios, security audit and cryptographic testing, dependency security scanning, user manual creation, developer documentation, user acceptance testing, and documentation completeness verification.",
+			"reasoning": "High complexity due to comprehensive testing requirements, security auditing needs, and documentation completeness. Critical for project success and requires thorough validation across all components."
+		}
+	]
+}
