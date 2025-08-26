@@ -128,6 +128,20 @@ export default function PasswordList({ entries, onDeleteEntry, searchQuery }: Pa
                 </div>
               )}
 
+              {/* Tags */}
+              {entry.tags && entry.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {entry.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Metadata */}
               <div className="mt-4 text-xs text-gray-400">
                 Created {new Date(entry.created_at).toLocaleDateString()}

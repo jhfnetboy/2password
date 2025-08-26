@@ -12,6 +12,15 @@ use uuid::Uuid;
 pub mod entry;
 pub mod vault;
 
+/// Search options for advanced search functionality
+#[derive(Debug, Clone, Default)]
+pub struct SearchOptions {
+    pub query: Option<String>,
+    pub tags: Vec<String>,
+    pub created_after: Option<chrono::DateTime<chrono::Utc>>,
+    pub created_before: Option<chrono::DateTime<chrono::Utc>>,
+}
+
 /// A single password entry
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PasswordEntry {
@@ -43,9 +52,48 @@ impl PasswordEntry {
         }
     }
 
+    /// Create a new password entry with all fields
+    pub fn new_with_fields(
+        title: String,
+        username: String,
+        password: String,
+        url: Option<String>,
+        notes: Option<String>,
+        tags: Vec<String>,
+    ) -> Self {
+        let now = chrono::Utc::now();
+        Self {
+            id: Uuid::new_v4(),
+            title,
+            username,
+            password,
+            url,
+            notes,
+            tags,
+            created_at: now,
+            updated_at: now,
+        }
+    }
+
     /// Update the password entry
     pub fn update(&mut self) {
         self.updated_at = chrono::Utc::now();
+    }
+
+    /// Add a tag to the entry
+    pub fn add_tag(&mut self, tag: String) {
+        if !self.tags.contains(&tag) {
+            self.tags.push(tag);
+            self.update();
+        }
+    }
+
+    /// Remove a tag from the entry
+    pub fn remove_tag(&mut self, tag: &str) {
+        if let Some(pos) = self.tags.iter().position(|t| t == tag) {
+            self.tags.remove(pos);
+            self.update();
+        }
     }
 }
 
@@ -139,6 +187,68 @@ impl Vault {
             .values()
             .filter(|entry| entry.title.to_lowercase().contains(&query_lower))
             .collect()
+    }
+
+    /// Advanced search with multiple fields and filters
+    pub fn advanced_search(&self, options: &SearchOptions) -> Vec<&PasswordEntry> {
+        self.entries
+            .values()
+            .filter(|entry| self.matches_search_criteria(entry, options))
+            .collect()
+    }
+
+    /// Check if an entry matches the search criteria
+    fn matches_search_criteria(&self, entry: &PasswordEntry, options: &SearchOptions) -> bool {
+        // Text search across multiple fields
+        if let Some(ref query) = options.query {
+            if !query.is_empty() {
+                let query_lower = query.to_lowercase();
+                let matches_text = entry.title.to_lowercase().contains(&query_lower)
+                    || entry.username.to_lowercase().contains(&query_lower)
+                    || entry.url.as_ref().map_or(false, |url| url.to_lowercase().contains(&query_lower))
+                    || entry.notes.as_ref().map_or(false, |notes| notes.to_lowercase().contains(&query_lower))
+                    || entry.tags.iter().any(|tag| tag.to_lowercase().contains(&query_lower));
+                
+                if !matches_text {
+                    return false;
+                }
+            }
+        }
+
+        // Tag filter
+        if !options.tags.is_empty() {
+            if !options.tags.iter().all(|tag| entry.tags.contains(tag)) {
+                return false;
+            }
+        }
+
+        // Date range filter
+        if let Some(after) = options.created_after {
+            if entry.created_at < after {
+                return false;
+            }
+        }
+
+        if let Some(before) = options.created_before {
+            if entry.created_at > before {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    /// Get all unique tags from vault entries
+    pub fn get_all_tags(&self) -> Vec<String> {
+        let mut tags = std::collections::HashSet::new();
+        for entry in self.entries.values() {
+            for tag in &entry.tags {
+                tags.insert(tag.clone());
+            }
+        }
+        let mut result: Vec<String> = tags.into_iter().collect();
+        result.sort();
+        result
     }
 
     /// Get all entries

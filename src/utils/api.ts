@@ -4,6 +4,7 @@ import {
   PasswordEntry, 
   VaultStatus, 
   PasswordGeneratorConfig,
+  AdvancedSearchOptions,
   TauriAPI 
 } from "../types";
 
@@ -44,9 +45,10 @@ export class TauriAPIClient implements TauriAPI {
     username: string, 
     password: string, 
     url?: string, 
-    notes?: string
+    notes?: string,
+    tags?: string[]
   ): Promise<string> {
-    return await invoke('add_entry', { title, username, password, url, notes });
+    return await invoke('add_entry', { title, username, password, url, notes, tags });
   }
   
   async remove_entry(entry_id: string): Promise<boolean> {
@@ -55,6 +57,23 @@ export class TauriAPIClient implements TauriAPI {
   
   async search_entries(query: string): Promise<PasswordEntry[]> {
     return await invoke('search_entries', { query });
+  }
+
+  // Advanced search and tag management
+  async advanced_search(options: AdvancedSearchOptions): Promise<PasswordEntry[]> {
+    return await invoke('advanced_search', { request: options });
+  }
+
+  async get_all_tags(): Promise<string[]> {
+    return await invoke('get_all_tags');
+  }
+
+  async add_tag_to_entry(entry_id: string, tag: string): Promise<boolean> {
+    return await invoke('add_tag_to_entry', { entry_id, tag });
+  }
+
+  async remove_tag_from_entry(entry_id: string, tag: string): Promise<boolean> {
+    return await invoke('remove_tag_from_entry', { entry_id, tag });
   }
   
   // Password generation
@@ -101,6 +120,10 @@ export const {
   add_entry,
   remove_entry,
   search_entries,
+  advanced_search,
+  get_all_tags,
+  add_tag_to_entry,
+  remove_tag_from_entry,
   generate_password,
   check_touchid_available,
   authenticate_touchid

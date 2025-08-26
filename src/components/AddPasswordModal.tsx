@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { X, Globe, User, Key, FileText, RefreshCw } from "lucide-react";
+import { X, Globe, User, Key, FileText, RefreshCw, Tag, Plus } from "lucide-react";
 
 interface AddPasswordModalProps {
-  onAdd: (title: string, username: string, password: string, url?: string, notes?: string) => void;
+  onAdd: (title: string, username: string, password: string, url?: string, notes?: string, tags?: string[]) => void;
   onClose: () => void;
 }
 
@@ -14,7 +14,28 @@ export default function AddPasswordModal({ onAdd, onClose }: AddPasswordModalPro
     url: "",
     notes: "",
   });
+  const [tags, setTags] = useState<string[]>([]);
+  const [currentTag, setCurrentTag] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const addTag = () => {
+    const tag = currentTag.trim();
+    if (tag && !tags.includes(tag)) {
+      setTags(prev => [...prev, tag]);
+      setCurrentTag("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addTag();
+    }
+  };
 
   const generatePassword = () => {
     setIsGenerating(true);
@@ -45,7 +66,8 @@ export default function AddPasswordModal({ onAdd, onClose }: AddPasswordModalPro
       formData.username.trim(),
       formData.password.trim(),
       formData.url.trim() || undefined,
-      formData.notes.trim() || undefined
+      formData.notes.trim() || undefined,
+      tags.length > 0 ? tags : undefined
     );
   };
 
@@ -143,6 +165,55 @@ export default function AddPasswordModal({ onAdd, onClose }: AddPasswordModalPro
             <p className="text-xs text-gray-500 mt-1">
               Click the refresh icon to generate a secure password
             </p>
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tags (optional)
+            </label>
+            <div className="space-y-2">
+              <div className="relative">
+                <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Add a tag and press Enter"
+                  className="input pl-10 pr-10"
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  onKeyPress={handleTagKeyPress}
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  disabled={!currentTag.trim()}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
+                  title="Add tag"
+                >
+                  <Plus className="h-4 w-4 text-gray-400" />
+                </button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 hover:text-blue-600"
+                        title="Remove tag"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Notes */}

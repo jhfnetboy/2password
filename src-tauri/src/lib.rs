@@ -3,7 +3,7 @@ use std::sync::Mutex;
 use tauri::State;
 
 // Import 2Password core functionality
-use twopassword::storage::{VaultManager, PasswordEntry};
+use twopassword::storage::{VaultManager, PasswordEntry, SearchOptions};
 use twopassword::auth::touchid;
 
 // Application state that will be shared across Tauri commands  
@@ -121,6 +121,7 @@ async fn add_entry(
     password: String,
     url: Option<String>,
     notes: Option<String>,
+    tags: Option<Vec<String>>,
 ) -> Result<String, String> {
     let mut vault_manager = state
         .vault_manager
@@ -128,9 +129,14 @@ async fn add_entry(
         .map_err(|e| format!("Failed to acquire lock: {}", e))?;
 
     if let Some(vault) = vault_manager.get_vault_mut() {
-        let mut entry = PasswordEntry::new(title, username, password);
-        entry.url = url;
-        entry.notes = notes;
+        let entry = PasswordEntry::new_with_fields(
+            title, 
+            username, 
+            password, 
+            url, 
+            notes, 
+            tags.unwrap_or_default()
+        );
         let entry_id = entry.id.to_string();
         vault.add_entry(entry);
         Ok(entry_id)
@@ -238,6 +244,126 @@ async fn generate_password(
     .map_err(|e| format!("Failed to generate password: {}", e))
 }
 
+// Advanced search command
+#[derive(serde::Deserialize)]
+struct AdvancedSearchRequest {
+    query: Option<String>,
+    tags: Option<Vec<String>>,
+    created_after: Option<String>,
+    created_before: Option<String>,
+}
+
+#[tauri::command]
+async fn advanced_search(
+    state: State<'_, AppState>,
+    request: AdvancedSearchRequest,
+) -> Result<Vec<serde_json::Value>, String> {
+    let vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    if let Some(vault) = vault_manager.get_vault() {
+        let mut search_options = SearchOptions::default();
+        search_options.query = request.query;
+        search_options.tags = request.tags.unwrap_or_default();
+
+        // Parse date strings if provided
+        if let Some(after_str) = request.created_after {
+            search_options.created_after = chrono::DateTime::parse_from_rfc3339(&after_str)
+                .map(|dt| dt.with_timezone(&chrono::Utc))
+                .ok();
+        }
+        
+        if let Some(before_str) = request.created_before {
+            search_options.created_before = chrono::DateTime::parse_from_rfc3339(&before_str)
+                .map(|dt| dt.with_timezone(&chrono::Utc))
+                .ok();
+        }
+
+        let entries = vault.advanced_search(&search_options);
+        let json_entries: Vec<serde_json::Value> = entries
+            .iter()
+            .map(|entry| serde_json::to_value(entry))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| format!("Failed to serialize entries: {}", e))?;
+        Ok(json_entries)
+    } else {
+        Err("No vault loaded".to_string())
+    }
+}
+
+// Get all tags command
+#[tauri::command]
+async fn get_all_tags(
+    state: State<'_, AppState>,
+) -> Result<Vec<String>, String> {
+    let vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    if let Some(vault) = vault_manager.get_vault() {
+        Ok(vault.get_all_tags())
+    } else {
+        Err("No vault loaded".to_string())
+    }
+}
+
+// Add tag to entry command
+#[tauri::command]
+async fn add_tag_to_entry(
+    state: State<'_, AppState>,
+    entry_id: String,
+    tag: String,
+) -> Result<bool, String> {
+    let mut vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    if let Some(vault) = vault_manager.get_vault_mut() {
+        let id = uuid::Uuid::parse_str(&entry_id)
+            .map_err(|e| format!("Invalid UUID: {}", e))?;
+        
+        if let Some(entry) = vault.get_entry_mut(&id) {
+            entry.add_tag(tag);
+            Ok(true)
+        } else {
+            Err("Entry not found".to_string())
+        }
+    } else {
+        Err("No vault loaded".to_string())
+    }
+}
+
+// Remove tag from entry command
+#[tauri::command]
+async fn remove_tag_from_entry(
+    state: State<'_, AppState>,
+    entry_id: String,
+    tag: String,
+) -> Result<bool, String> {
+    let mut vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    if let Some(vault) = vault_manager.get_vault_mut() {
+        let id = uuid::Uuid::parse_str(&entry_id)
+            .map_err(|e| format!("Invalid UUID: {}", e))?;
+        
+        if let Some(entry) = vault.get_entry_mut(&id) {
+            entry.remove_tag(&tag);
+            Ok(true)
+        } else {
+            Err("Entry not found".to_string())
+        }
+    } else {
+        Err("No vault loaded".to_string())
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -253,6 +379,10 @@ pub fn run() {
             add_entry,
             remove_entry,
             search_entries,
+            advanced_search,
+            get_all_tags,
+            add_tag_to_entry,
+            remove_tag_from_entry,
             save_vault,
             close_vault,
             generate_password,

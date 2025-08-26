@@ -64,10 +64,11 @@ function App() {
     username: string,
     password: string,
     url?: string,
-    notes?: string
+    notes?: string,
+    tags?: string[]
   ) => {
     try {
-      await invoke("add_entry", { title, username, password, url, notes });
+      await invoke("add_entry", { title, username, password, url, notes, tags });
       await loadEntries();
       setShowAddModal(false);
     } catch (error) {

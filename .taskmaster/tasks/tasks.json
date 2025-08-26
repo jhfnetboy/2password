@@ -576,11 +576,299 @@
         ],
         "status": "pending",
         "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Smart Import/Export System with Multi-Format Support",
+        "description": "Implement comprehensive import/export functionality supporting CSV, 1Password, LastPass, Bitwarden formats with automatic format detection and data validation",
+        "details": "Create import/export service with format parsers for major password managers. Add auto-detection based on file structure/headers. Implement data validation, duplicate detection, and error handling. Support CSV export with customizable fields. Add import preview UI showing what will be imported. Use Rust serde for JSON parsing and csv crate for CSV handling. Add progress tracking for large imports.",
+        "testStrategy": "Test with real export files from 1Password, LastPass, Bitwarden. Verify 99%+ import accuracy with sample datasets of 1000+ entries. Test error handling with malformed files. Validate export format compatibility with target password managers.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core Import/Export Service Architecture",
+            "description": "Create the foundational import/export service with trait definitions and common data structures for handling different password manager formats",
+            "dependencies": [],
+            "details": "Create ImportExportService struct with traits for different format parsers (ImportParser, ExportFormatter). Define common PasswordEntry data structure that can represent entries from all supported formats. Implement error types and result handling for import/export operations. Set up the service registry pattern for format parsers.",
+            "status": "pending",
+            "testStrategy": "Unit tests for service initialization and trait implementations. Test common data structure serialization/deserialization. Verify error handling covers all expected failure scenarios."
+          },
+          {
+            "id": 2,
+            "title": "Build Format-Specific Parsers for Major Password Managers",
+            "description": "Implement dedicated parsers for 1Password, LastPass, Bitwarden, and CSV formats using serde and csv crate",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "Create OnePasswordParser, LastPassParser, BitwardenParser, and CSVParser structs implementing ImportParser trait. Use serde for JSON parsing (1Password, Bitwarden) and csv crate for CSV handling. Handle format-specific field mappings and data transformations. Implement robust parsing with graceful error handling for malformed data.",
+            "status": "pending",
+            "testStrategy": "Test each parser with real export files from respective password managers. Verify parsing accuracy with various entry types (logins, secure notes, etc.). Test error handling with corrupted and malformed files."
+          },
+          {
+            "id": 3,
+            "title": "Implement Automatic Format Detection System",
+            "description": "Create intelligent format detection based on file structure, headers, and content analysis",
+            "dependencies": [
+              "16.2"
+            ],
+            "details": "Implement FormatDetector that analyzes file headers, JSON structure, and CSV column patterns to automatically identify format type. Create confidence scoring system for detection accuracy. Handle edge cases where format detection is ambiguous. Provide fallback mechanisms for manual format selection.",
+            "status": "pending",
+            "testStrategy": "Test detection accuracy with files from all supported formats. Verify handling of edge cases and ambiguous files. Test detection speed with large files (1000+ entries)."
+          },
+          {
+            "id": 4,
+            "title": "Build Data Validation and Duplicate Detection Engine",
+            "description": "Implement comprehensive data validation, duplicate detection, and conflict resolution for imported entries",
+            "dependencies": [
+              "16.1"
+            ],
+            "details": "Create DataValidator for entry validation (URL format, password strength analysis, required fields). Implement DuplicateDetector using fuzzy matching algorithms for URLs, usernames, and titles. Build conflict resolution system with user-selectable merge strategies. Add data sanitization and normalization for consistent storage.",
+            "status": "pending",
+            "testStrategy": "Test validation rules with various entry formats and edge cases. Verify duplicate detection accuracy with similar but non-identical entries. Test conflict resolution with different merge strategies."
+          },
+          {
+            "id": 5,
+            "title": "Create Export System with Progress Tracking and Preview UI",
+            "description": "Implement customizable export functionality with progress tracking and import preview interface",
+            "dependencies": [
+              "16.2",
+              "16.3",
+              "16.4"
+            ],
+            "details": "Build ExportFormatter for CSV with customizable field selection and ordering. Implement progress tracking system with cancellation support for large imports/exports. Create import preview UI showing entry count, detected duplicates, and validation issues before final import. Add batch processing for handling large datasets efficiently.",
+            "status": "pending",
+            "testStrategy": "Test export compatibility with target password managers. Verify progress tracking accuracy and cancellation functionality. Test preview UI with various import scenarios and edge cases."
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Password Health Dashboard and Security Analysis",
+        "description": "Build comprehensive password health monitoring system with weak/reused password detection, security scoring, and breach notifications",
+        "details": "Implement password strength analysis using zxcvbn-rs crate. Create reused password detection algorithm. Integrate HaveIBeenPwned API for breach checking with k-anonymity (hash prefix method). Build security score calculation considering age, complexity, uniqueness. Add dashboard UI with charts showing security metrics. Implement background breach monitoring service with notifications. Add password age tracking and suggestions for updates.",
+        "testStrategy": "Test password analysis with various weak/strong passwords. Verify reused password detection accuracy. Test HaveIBeenPwned integration without exposing actual passwords. Validate security scoring algorithm with known weak/strong password datasets.",
+        "priority": "high",
+        "dependencies": [
+          16
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Advanced Search Engine with Tags and Filters",
+        "description": "Enhanced search capabilities with tag filtering, category organization, custom fields, and saved search queries",
+        "details": "Extend storage model to support tags, categories, and custom fields. Implement full-text search using tantivy or similar Rust search engine. Add advanced query syntax with field-specific searches. Create tag management UI with autocomplete. Implement saved searches with user-defined queries. Add search result highlighting and relevance scoring. Optimize search index for 10k+ entries with <200ms response time.",
+        "testStrategy": "Test search performance with 10k+ entries. Verify advanced query syntax works correctly. Test tag filtering and category organization. Validate saved searches persistence and sharing.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Cross-Browser Extension Suite with Auto-Fill",
+        "description": "Develop comprehensive browser extensions for Chrome, Firefox, Safari, and Edge with intelligent auto-fill and password capture",
+        "details": "Create WebExtension-compatible extensions using Manifest V3. Implement secure native messaging protocol between extension and desktop app using Tauri's API. Build intelligent form detection using DOM analysis and machine learning patterns. Add auto-fill engine with field mapping for various form types. Implement automatic password capture for registration/password change flows. Create consistent UI across all browsers with popup and options pages. Use content scripts for form interaction and background script for app communication.",
+        "testStrategy": "Test on top 100 websites for form detection accuracy (target 95%+). Verify extension works across all target browsers. Test secure communication protocol with desktop app. Validate auto-capture functionality on various registration forms.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "WebExtension Manifest and Project Structure Setup",
+            "description": "Create cross-browser compatible extension project structure with Manifest V3 configuration for Chrome, Firefox, Safari, and Edge",
+            "dependencies": [],
+            "details": "Set up extension directory structure with separate manifests for each browser (manifest.json for Chrome/Edge, manifest.json with modifications for Firefox, manifest.json for Safari). Configure Manifest V3 permissions including storage, activeTab, tabs, nativeMessaging. Create build system to generate browser-specific packages. Set up TypeScript configuration and webpack bundling for extension assets.",
+            "status": "pending",
+            "testStrategy": "Verify extension loads successfully in all target browsers. Test manifest validation using browser developer tools. Confirm all required permissions are properly declared and functional."
+          },
+          {
+            "id": 2,
+            "title": "Native Messaging Protocol Implementation",
+            "description": "Implement secure communication bridge between browser extension and Tauri desktop application using native messaging protocol",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Create native messaging host configuration files for each browser. Implement message serialization/deserialization using JSON protocol. Add authentication handshake between extension and desktop app using shared secrets. Create message routing system for different operation types (authenticate, retrieve, store, capture). Implement error handling and timeout mechanisms for failed communications.",
+            "status": "pending",
+            "testStrategy": "Test bidirectional communication between extension and desktop app. Verify message authentication and encryption. Test connection recovery after desktop app restart. Validate timeout handling for unresponsive operations."
+          },
+          {
+            "id": 3,
+            "title": "Intelligent Form Detection Engine",
+            "description": "Build DOM analysis system for intelligent form field detection and classification using machine learning patterns",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Implement content script for DOM scanning and form field analysis. Create heuristic algorithms to identify login forms, registration forms, and password change forms. Build field classification system using element attributes, labels, placeholder text, and context analysis. Add machine learning patterns for common form layouts and field types. Implement form change detection and dynamic content handling for SPA applications.",
+            "status": "pending",
+            "testStrategy": "Test form detection accuracy on top 100 websites with target 95%+ success rate. Verify classification accuracy for username, password, email, and other credential fields. Test dynamic form handling on Ajax-heavy sites."
+          },
+          {
+            "id": 4,
+            "title": "Auto-Fill Engine with Field Mapping",
+            "description": "Create intelligent auto-fill system with advanced field mapping and credential injection capabilities",
+            "dependencies": [
+              "19.2",
+              "19.3"
+            ],
+            "details": "Implement secure credential injection system that respects CSP policies. Create field mapping algorithms to match stored credentials with detected form fields. Add support for multi-step login flows and complex form structures. Implement auto-fill triggering mechanisms (click, focus, keyboard shortcuts). Create credential selection UI for multiple matching accounts. Add form submission detection and success/failure handling.",
+            "status": "pending",
+            "testStrategy": "Test auto-fill accuracy across diverse login forms and multi-step authentication flows. Verify CSP compliance and security restrictions. Test credential selection UI with multiple matching accounts. Validate form submission detection reliability."
+          },
+          {
+            "id": 5,
+            "title": "Password Capture and Extension UI",
+            "description": "Implement automatic password capture for registration flows and create consistent popup/options UI across all browsers",
+            "dependencies": [
+              "19.3",
+              "19.4"
+            ],
+            "details": "Build password capture system for new account registration and password change flows. Create popup interface for quick access to credentials and settings. Implement options page with extension configuration, security settings, and account management. Add capture confirmation dialogs and credential categorization. Create consistent styling and behavior across Chrome, Firefox, Safari, and Edge. Implement keyboard shortcuts and accessibility features.",
+            "status": "pending",
+            "testStrategy": "Test automatic capture on various registration and password change forms. Verify UI consistency and functionality across all target browsers. Test accessibility compliance and keyboard navigation. Validate capture accuracy and false positive prevention."
+          }
+        ]
+      },
+      {
+        "id": 20,
+        "title": "Advanced Security Infrastructure and Audit System",
+        "description": "Implement enterprise-grade security monitoring, comprehensive audit logging, and advanced authentication options",
+        "details": "Build comprehensive audit logging system with tamper-evident logs using cryptographic signatures. Implement security dashboard showing login attempts, device access, and security events. Add hardware key support using WebAuthn/FIDO2 standards with authenticator-rs crate. Create device management system with trusted device registration. Implement emergency access with time-delayed recovery. Add session management with automatic timeout. Create security alerts for suspicious activity.",
+        "testStrategy": "Test audit log integrity with cryptographic verification. Verify hardware key integration with multiple FIDO2 devices. Test emergency access workflow with various scenarios. Validate security monitoring with simulated attack scenarios.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Comprehensive Audit Logging System with Cryptographic Integrity",
+            "description": "Implement tamper-evident audit logging system with cryptographic signatures for all security events, user actions, and system operations",
+            "dependencies": [],
+            "details": "Build audit logging infrastructure using cryptographic hash chains and digital signatures to ensure log integrity. Implement structured logging for authentication events, data access, configuration changes, and security incidents. Create log rotation and archival system with configurable retention policies. Add log verification tools to detect tampering. Use ring crate for cryptographic operations and implement Merkle tree structure for efficient integrity verification.",
+            "status": "pending",
+            "testStrategy": "Test log integrity verification with simulated tampering attempts. Verify cryptographic signatures validate correctly. Test log rotation and archival processes. Validate audit trail completeness for all security-relevant operations."
+          },
+          {
+            "id": 2,
+            "title": "Security Dashboard and Monitoring Interface",
+            "description": "Create comprehensive security dashboard displaying login attempts, device access patterns, security events, and threat intelligence",
+            "dependencies": [
+              "20.1"
+            ],
+            "details": "Build real-time security dashboard showing authentication history, failed login attempts, device access patterns, and security alerts. Implement threat detection algorithms for suspicious activity patterns like unusual login locations, multiple failed attempts, or access from new devices. Create visual analytics with charts and graphs for security metrics. Add configurable alerting system with email/push notifications. Integrate with audit logging system to display tamper-evident security timeline.",
+            "status": "pending",
+            "testStrategy": "Test dashboard real-time updates with live security events. Verify threat detection algorithms with simulated attack patterns. Test alert system delivery and configuration. Validate dashboard performance with high-volume security data."
+          },
+          {
+            "id": 3,
+            "title": "Hardware Security Key Integration with WebAuthn/FIDO2",
+            "description": "Implement hardware security key support using WebAuthn/FIDO2 standards with YubiKey and other authenticator compatibility",
+            "dependencies": [],
+            "details": "Integrate webauthn-rs and authenticator-rs crates for hardware security key support. Implement FIDO2/WebAuthn registration and authentication flows. Add support for resident keys and usernameless authentication. Create fallback mechanisms for hardware key unavailability. Implement key management interface for registering, naming, and revoking hardware keys. Add cross-platform support for USB, NFC, and Bluetooth authenticators.",
+            "status": "pending",
+            "testStrategy": "Test hardware key registration and authentication with multiple FIDO2 devices including YubiKey, Titan, and SoloKeys. Verify usernameless authentication flows. Test fallback mechanisms when hardware keys are unavailable. Validate cross-platform compatibility."
+          },
+          {
+            "id": 4,
+            "title": "Trusted Device Management and Registration System",
+            "description": "Build device management system for registering, tracking, and managing trusted devices with automatic device fingerprinting",
+            "dependencies": [
+              "20.2"
+            ],
+            "details": "Create device fingerprinting system using hardware characteristics, browser properties, and system information to uniquely identify devices. Implement trusted device registration workflow with email/SMS verification. Build device management interface showing device history, last access times, and location information. Add device revocation capabilities and automatic cleanup of inactive devices. Implement device risk scoring based on location, access patterns, and device characteristics.",
+            "status": "pending",
+            "testStrategy": "Test device fingerprinting accuracy and uniqueness across different platforms. Verify device registration and verification workflows. Test device revocation and access restriction. Validate risk scoring algorithms with various device scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Emergency Access and Session Management System",
+            "description": "Implement time-delayed emergency access recovery system and comprehensive session management with automatic timeouts and security monitoring",
+            "dependencies": [
+              "20.1",
+              "20.2",
+              "20.4"
+            ],
+            "details": "Build emergency access system with configurable time delays and multi-factor verification. Implement account recovery workflows with identity verification and security questions. Create comprehensive session management with automatic timeouts, concurrent session limits, and session hijacking detection. Add session monitoring showing active sessions, locations, and device information. Implement security alerts for suspicious session activity and forced logout capabilities.",
+            "status": "pending",
+            "testStrategy": "Test emergency access workflows with various recovery scenarios. Verify time delay mechanisms and security checks. Test session timeout and concurrent session management. Validate session hijacking detection and security alert generation."
+          }
+        ]
+      },
+      {
+        "id": 21,
+        "title": "Performance Optimization and Scalability Engine",
+        "description": "Optimize application performance for large datasets with advanced indexing, memory management, and UI enhancements",
+        "details": "Implement database optimization with SQLite FTS5 for full-text search. Create memory-efficient data structures using Rust's zero-copy serialization. Add lazy loading and virtual scrolling for large entry lists. Implement smart caching layer with LRU eviction. Create background task processing system using tokio async runtime. Add memory profiling and performance monitoring. Optimize startup time with incremental vault loading. Implement smooth animations using React Spring or Framer Motion.",
+        "testStrategy": "Benchmark search performance with 10k+ entries (target <100ms). Monitor memory usage during typical operations (target <50MB). Test UI responsiveness with smooth 60fps animations. Validate startup time on various hardware configurations (target <2s).",
+        "priority": "high",
+        "dependencies": [
+          18
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Cross-Platform Native Integration Suite",
+        "description": "Implement platform-specific integrations for Windows Hello, Linux keyring, and enhanced cloud synchronization",
+        "details": "Extend existing Touch ID implementation to support Windows Hello using windows-rs crate. Add Linux desktop integration with secret-service crate for GNOME Keyring/KWallet. Implement platform-specific UI adaptations following native design guidelines. Add system tray integration for quick access. Create cloud synchronization service supporting iCloud, Google Drive, Dropbox APIs. Implement conflict resolution for concurrent edits. Add selective sync configuration. Build foundation architecture for future mobile apps.",
+        "testStrategy": "Test biometric authentication on all supported platforms. Verify system keyring integration on various Linux distributions. Test cloud sync reliability with network interruptions and conflicts. Validate platform UI consistency with native applications.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "User Experience Polish and Accessibility Suite",
+        "description": "Polish user experience with smooth animations, comprehensive keyboard shortcuts, and full accessibility support",
+        "details": "Implement smooth animations and transitions using Framer Motion with consistent easing curves. Add comprehensive keyboard shortcuts for power users with customizable hotkeys. Ensure full accessibility compliance with WCAG 2.1 AA standards including screen reader support. Create interactive onboarding flow with security best practices guidance. Build contextual help system with tooltips and in-app documentation. Add dark mode support with system preference detection. Implement drag-and-drop for entry organization.",
+        "testStrategy": "Validate WCAG 2.1 AA compliance using automated testing tools and manual screen reader testing. Test keyboard navigation covers all functionality. Measure onboarding completion rates (target >80%). Verify animations perform smoothly on various hardware.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Advanced Backup and Synchronization System",
+        "description": "Enterprise-grade backup system with versioning, conflict resolution, and full offline support",
+        "details": "Implement versioned backup system with automatic incremental backups and configurable retention policies. Create intelligent conflict resolution using three-way merge algorithms and operational transforms. Build end-to-end encrypted synchronization maintaining zero-knowledge architecture. Add selective sync allowing users to choose data subsets per device. Implement complete offline mode with sync reconciliation when connectivity returns. Create backup verification system with integrity checks.",
+        "testStrategy": "Test backup reliability across various failure scenarios. Verify conflict resolution handles concurrent edits correctly. Test offline mode functionality with complete feature parity. Validate E2E encryption maintains security during sync operations.",
+        "priority": "medium",
+        "dependencies": [
+          22
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Production Deployment and Distribution Infrastructure",
+        "description": "Complete deployment pipeline with code signing, automatic updates, and professional distribution channels",
+        "details": "Set up code signing infrastructure with Apple Developer certificates and Windows Authenticode. Implement automatic update system using Tauri's updater with signature verification and rollback capabilities. Create multi-platform distribution supporting Mac App Store, Windows Store, Linux package managers, and direct download. Add anonymous telemetry collection for usage analytics and crash reporting using sentry-rs. Build customer support infrastructure with bug tracking and user feedback systems. Create comprehensive documentation and help resources.",
+        "testStrategy": "Test update system across all platforms with various update scenarios. Verify code signing and distribution pipeline integrity. Test crash reporting and telemetry collection while maintaining user privacy. Validate customer support workflows and response times.",
+        "priority": "high",
+        "dependencies": [
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-08-26T03:41:45.934Z",
-      "updated": "2025-08-26T17:09:36.578Z",
+      "updated": "2025-08-26T17:24:38.495Z",
       "description": "Tasks for master context"
     }
   }

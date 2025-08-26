@@ -54,6 +54,13 @@ export interface PasswordGeneratorConfig {
   include_lowercase?: boolean;
 }
 
+export interface AdvancedSearchOptions {
+  query?: string;
+  tags?: string[];
+  created_after?: string;
+  created_before?: string;
+}
+
 // Tauri API interface
 export interface TauriAPI {
   // Basic commands
@@ -68,9 +75,15 @@ export interface TauriAPI {
   
   // Entry management
   get_all_entries(): Promise<PasswordEntry[]>;
-  add_entry(title: string, username: string, password: string, url?: string, notes?: string): Promise<string>;
+  add_entry(title: string, username: string, password: string, url?: string, notes?: string, tags?: string[]): Promise<string>;
   remove_entry(entry_id: string): Promise<boolean>;
   search_entries(query: string): Promise<PasswordEntry[]>;
+  
+  // Advanced search and tag management
+  advanced_search(options: AdvancedSearchOptions): Promise<PasswordEntry[]>;
+  get_all_tags(): Promise<string[]>;
+  add_tag_to_entry(entry_id: string, tag: string): Promise<boolean>;
+  remove_tag_from_entry(entry_id: string, tag: string): Promise<boolean>;
   
   // Password generation
   generate_password(config?: PasswordGeneratorConfig): Promise<string>;
