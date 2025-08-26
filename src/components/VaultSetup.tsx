@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Shield, FolderOpen } from "lucide-react";
+import { load_vault, greet } from "../utils/api";
 
 interface VaultSetupProps {
   onVaultLoaded: () => void;
@@ -28,10 +28,7 @@ export default function VaultSetup({ onVaultLoaded }: VaultSetupProps) {
           setError(null);
           
           try {
-            await invoke("load_vault", { 
-              path: result, 
-              password 
-            });
+            await load_vault(result, password);
             onVaultLoaded();
           } catch (error) {
             setError("Failed to load vault. Please check your password.");
@@ -46,11 +43,22 @@ export default function VaultSetup({ onVaultLoaded }: VaultSetupProps) {
     }
   };
 
-  const handleCreateNewVault = () => {
-    // For demo purposes, just call greet and load vault
-    invoke("greet").then(() => {
+  const handleCreateNewVault = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // For demo purposes, call greet to test communication
+      const greeting = await greet();
+      console.log("Backend greeting:", greeting);
+      
+      // In real implementation, we would open create vault dialog
       onVaultLoaded();
-    });
+    } catch (error) {
+      setError("Failed to create vault: " + error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

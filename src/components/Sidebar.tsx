@@ -3,9 +3,11 @@ import { Shield, Plus, Settings, Lock, Fingerprint } from "lucide-react";
 interface SidebarProps {
   touchIdAvailable: boolean;
   onNewEntry: () => void;
+  onNavigate: (view: 'passwords' | 'settings') => void;
+  currentView: 'passwords' | 'settings';
 }
 
-export default function Sidebar({ touchIdAvailable, onNewEntry }: SidebarProps) {
+export default function Sidebar({ touchIdAvailable, onNewEntry, onNavigate, currentView }: SidebarProps) {
   return (
     <div className="sidebar">
       <div className="p-6">
@@ -28,27 +30,41 @@ export default function Sidebar({ touchIdAvailable, onNewEntry }: SidebarProps) 
 
         {/* Navigation */}
         <nav className="space-y-1">
-          <a href="#" className="flex items-center px-3 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-lg">
+          <button 
+            onClick={() => onNavigate('passwords')}
+            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              currentView === 'passwords' 
+                ? 'text-gray-900 bg-gray-100' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
             <Shield className="h-4 w-4 mr-3" />
             All Passwords
-          </a>
+          </button>
           
           {touchIdAvailable && (
-            <a href="#" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+            <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
               <Fingerprint className="h-4 w-4 mr-3" />
               Touch ID Settings
-            </a>
+            </button>
           )}
           
-          <a href="#" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <button 
+            onClick={() => onNavigate('settings')}
+            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              currentView === 'settings' 
+                ? 'text-gray-900 bg-gray-100' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
             <Settings className="h-4 w-4 mr-3" />
             Settings
-          </a>
+          </button>
           
-          <a href="#" className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
+          <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
             <Lock className="h-4 w-4 mr-3" />
             Security
-          </a>
+          </button>
         </nav>
       </div>
 
