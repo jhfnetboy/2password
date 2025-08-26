@@ -26,5 +26,12 @@ node_modules/
 
 
 # Added by cargo
-
 /target
+
+# Tauri
+/src-tauri/target
+/dist
+/bundle
+
+# pnpm
+/.pnpm-store
