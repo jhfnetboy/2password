@@ -9,7 +9,7 @@
         "testStrategy": "验证cargo build成功编译，cargo test运行通过，所有依赖项正确解析",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -17,7 +17,7 @@
             "description": "使用cargo init创建新的Rust项目并验证基本结构",
             "dependencies": [],
             "details": "运行cargo init命令创建新项目，验证生成的Cargo.toml和src/main.rs文件。确保项目可以使用cargo build成功编译hello world程序。",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -28,7 +28,7 @@
               "1.1"
             ],
             "details": "配置Cargo.toml添加tokio、serde、clap、ring、webauthn-rs、objc、core-foundation、zeroize等依赖项。设置正确的版本号和特性标志。运行cargo check验证依赖解析成功。",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -39,7 +39,7 @@
               "1.2"
             ],
             "details": "创建src/lib.rs、src/crypto/mod.rs、src/cli/mod.rs、src/storage/mod.rs等目录和文件。在main.rs中添加模块声明。确保每个模块都有基本的pub mod声明和占位符函数。",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -50,7 +50,7 @@
               "1.3"
             ],
             "details": "创建rustfmt.toml配置文件设置代码格式化规则。配置clippy.toml设置代码检查规则。在Cargo.toml中添加[dev-dependencies]包含开发工具。验证rustfmt和clippy可以正常运行。",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -580,7 +580,7 @@
     ],
     "metadata": {
       "created": "2025-08-26T03:41:45.934Z",
-      "updated": "2025-08-26T03:41:45.934Z",
+      "updated": "2025-08-26T04:30:11.577Z",
       "description": "Tasks for master context"
     }
   }

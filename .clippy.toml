@@ -1,0 +1,12 @@
+# Clippy configuration for TwoPassword
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Numeric limits
+type-complexity-threshold = 250
+too-many-arguments-threshold = 7
+too-many-lines-threshold = 100
+
+# Naming conventions
+enum-variant-name-threshold = 3
