@@ -63,6 +63,17 @@ csv = "1.3"
 # HTTP client for WebAuthn
 reqwest = { version = "0.11", features = ["json"] }
 
+# Password strength analysis
+zxcvbn = "2.2"
+
+# LRU Cache for password analysis
+lru = "0.12"
+
+# Hash functions for breach checking
+md5 = "0.7"
+sha1 = "0.10"
+sha2 = "0.10"
+
 [dev-dependencies]
 # Testing framework
 tokio-test = "0.4"

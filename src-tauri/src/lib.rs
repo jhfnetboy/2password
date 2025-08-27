@@ -6,11 +6,13 @@ use tauri::State;
 use twopassword::storage::{VaultManager, PasswordEntry, SearchOptions};
 use twopassword::import_export::{ImportExportService, ImportFormat, ImportResult, ExportOptions};
 use twopassword::auth::touchid;
+use twopassword::password_health::{PasswordHealthService, DashboardData};
 
 // Application state that will be shared across Tauri commands  
 pub struct AppState {
     vault_manager: Mutex<VaultManager>,
     import_export: Mutex<ImportExportService>,
+    password_health: Mutex<PasswordHealthService>,
 }
 
 impl Default for AppState {
@@ -18,6 +20,7 @@ impl Default for AppState {
         Self {
             vault_manager: Mutex::new(VaultManager::new()),
             import_export: Mutex::new(ImportExportService::new()),
+            password_health: Mutex::new(PasswordHealthService::new()),
         }
     }
 }
@@ -551,6 +554,198 @@ async fn remove_tag_from_entry(
     }
 }
 
+// Password Health Dashboard commands
+
+// Generate comprehensive password health dashboard
+#[tauri::command]
+async fn generate_password_health_dashboard(
+    state: State<'_, AppState>,
+) -> Result<serde_json::Value, String> {
+    // Extract entries first, then release the lock
+    let entries: Vec<PasswordEntry> = {
+        let vault_manager = state
+            .vault_manager
+            .lock()
+            .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+        if let Some(vault) = vault_manager.get_vault() {
+            vault.get_all_entries().into_iter().cloned().collect()
+        } else {
+            return Err("No vault loaded".to_string());
+        }
+    }; // vault_manager lock released here
+
+    // Clone the PasswordHealthService to avoid holding the lock
+    let password_health_service = {
+        let password_health = state
+            .password_health
+            .lock()
+            .map_err(|e| format!("Failed to acquire health lock: {}", e))?;
+            
+        // We need to clone or take ownership to avoid the Send issue
+        // For now, let's create a new instance
+        twopassword::password_health::PasswordHealthService::new()
+    };
+
+    // Now we can await without holding any locks
+    let dashboard_data = password_health_service.generate_dashboard(&entries).await
+        .map_err(|e| format!("Failed to generate dashboard: {}", e))?;
+
+    serde_json::to_value(dashboard_data)
+        .map_err(|e| format!("Failed to serialize dashboard: {}", e))
+}
+
+// Analyze single password strength
+#[tauri::command]
+async fn analyze_password_strength(
+    state: State<'_, AppState>,
+    password: String,
+) -> Result<serde_json::Value, String> {
+    // Create a new instance to avoid the Send issue
+    let password_health_service = twopassword::password_health::PasswordHealthService::new();
+
+    let analysis = password_health_service.analyze_password(&password)
+        .map_err(|e| format!("Failed to analyze password: {}", e))?;
+
+    serde_json::to_value(analysis)
+        .map_err(|e| format!("Failed to serialize analysis: {}", e))
+}
+
+// Check password against breaches
+#[tauri::command]
+async fn check_password_breach(
+    state: State<'_, AppState>,
+    password: String,
+) -> Result<serde_json::Value, String> {
+    // Create a new instance to avoid the Send issue
+    let password_health_service = twopassword::password_health::PasswordHealthService::new();
+
+    let breach_result = password_health_service.check_breach(&password).await
+        .map_err(|e| format!("Failed to check breach: {}", e))?;
+
+    serde_json::to_value(breach_result)
+        .map_err(|e| format!("Failed to serialize breach result: {}", e))
+}
+
+// Generate security summary report
+#[tauri::command]
+async fn generate_security_summary(
+    state: State<'_, AppState>,
+) -> Result<String, String> {
+    use twopassword::password_health::dashboard::generate_summary_line;
+    
+    // Extract entries first, then release the lock
+    let entries: Vec<PasswordEntry> = {
+        let vault_manager = state
+            .vault_manager
+            .lock()
+            .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+        if let Some(vault) = vault_manager.get_vault() {
+            vault.get_all_entries().into_iter().cloned().collect()
+        } else {
+            return Err("No vault loaded".to_string());
+        }
+    };
+
+    // Create a new instance and generate dashboard
+    let password_health_service = twopassword::password_health::PasswordHealthService::new();
+    let dashboard_data = password_health_service.generate_dashboard(&entries).await
+        .map_err(|e| format!("Failed to generate summary: {}", e))?;
+
+    Ok(generate_summary_line(&dashboard_data))
+}
+
+// Generate full dashboard report as text
+#[tauri::command]
+async fn generate_dashboard_report(
+    state: State<'_, AppState>,
+) -> Result<String, String> {
+    use twopassword::password_health::dashboard::generate_dashboard_report;
+    
+    // Extract entries first, then release the lock
+    let entries: Vec<PasswordEntry> = {
+        let vault_manager = state
+            .vault_manager
+            .lock()
+            .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+        if let Some(vault) = vault_manager.get_vault() {
+            vault.get_all_entries().into_iter().cloned().collect()
+        } else {
+            return Err("No vault loaded".to_string());
+        }
+    };
+
+    // Create a new instance and generate dashboard
+    let password_health_service = twopassword::password_health::PasswordHealthService::new();
+    let dashboard_data = password_health_service.generate_dashboard(&entries).await
+        .map_err(|e| format!("Failed to generate dashboard: {}", e))?;
+
+    generate_dashboard_report(&dashboard_data)
+        .map_err(|e| format!("Failed to generate report: {}", e))
+}
+
+// Export dashboard data as JSON
+#[tauri::command]
+async fn export_dashboard_json(
+    state: State<'_, AppState>,
+) -> Result<String, String> {
+    use twopassword::password_health::dashboard::export_dashboard_json;
+    
+    // Extract entries first, then release the lock
+    let entries: Vec<PasswordEntry> = {
+        let vault_manager = state
+            .vault_manager
+            .lock()
+            .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+        if let Some(vault) = vault_manager.get_vault() {
+            vault.get_all_entries().into_iter().cloned().collect()
+        } else {
+            return Err("No vault loaded".to_string());
+        }
+    };
+
+    // Create a new instance and generate dashboard
+    let password_health_service = twopassword::password_health::PasswordHealthService::new();
+    let dashboard_data = password_health_service.generate_dashboard(&entries).await
+        .map_err(|e| format!("Failed to generate dashboard: {}", e))?;
+
+    export_dashboard_json(&dashboard_data)
+        .map_err(|e| format!("Failed to export JSON: {}", e))
+}
+
+// Export security metrics as CSV
+#[tauri::command]
+async fn export_metrics_csv(
+    state: State<'_, AppState>,
+) -> Result<String, String> {
+    use twopassword::password_health::dashboard::export_metrics_csv;
+    
+    // Extract entries first, then release the lock
+    let entries: Vec<PasswordEntry> = {
+        let vault_manager = state
+            .vault_manager
+            .lock()
+            .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+        if let Some(vault) = vault_manager.get_vault() {
+            vault.get_all_entries().into_iter().cloned().collect()
+        } else {
+            return Err("No vault loaded".to_string());
+        }
+    };
+
+    // Create a new instance and generate dashboard
+    let password_health_service = twopassword::password_health::PasswordHealthService::new();
+    let dashboard_data = password_health_service.generate_dashboard(&entries).await
+        .map_err(|e| format!("Failed to generate dashboard: {}", e))?;
+
+    export_metrics_csv(&dashboard_data)
+        .map_err(|e| format!("Failed to export CSV: {}", e))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -578,7 +773,14 @@ pub fn run() {
             export_passwords,
             get_supported_formats,
             check_touchid_available,
-            authenticate_touchid
+            authenticate_touchid,
+            generate_password_health_dashboard,
+            analyze_password_strength,
+            check_password_breach,
+            generate_security_summary,
+            generate_dashboard_report,
+            export_dashboard_json,
+            export_metrics_csv
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
