@@ -1,10 +1,10 @@
-import { Shield, Plus, Settings, Lock, Fingerprint } from "lucide-react";
+import { Shield, Plus, Settings, Lock, Fingerprint, BarChart3 } from "lucide-react";
 
 interface SidebarProps {
   touchIdAvailable: boolean;
   onNewEntry: () => void;
-  onNavigate: (view: 'passwords' | 'settings') => void;
-  currentView: 'passwords' | 'settings';
+  onNavigate: (view: 'passwords' | 'health' | 'settings') => void;
+  currentView: 'passwords' | 'health' | 'settings';
 }
 
 export default function Sidebar({ touchIdAvailable, onNewEntry, onNavigate, currentView }: SidebarProps) {
@@ -40,6 +40,18 @@ export default function Sidebar({ touchIdAvailable, onNewEntry, onNavigate, curr
           >
             <Shield className="h-4 w-4 mr-3" />
             All Passwords
+          </button>
+
+          <button 
+            onClick={() => onNavigate('health')}
+            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              currentView === 'health' 
+                ? 'text-gray-900 bg-gray-100' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            <BarChart3 className="h-4 w-4 mr-3" />
+            Password Health
           </button>
           
           {touchIdAvailable && (

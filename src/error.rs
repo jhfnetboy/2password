@@ -43,6 +43,9 @@ pub enum TwoPasswordError {
 
     #[error("Import/Export error: {0}")]
     ImportExportError(String),
+
+    #[error("Security error: {0}")]
+    SecurityError(String),
 }
 
 /// Convenience result type
@@ -82,5 +85,10 @@ impl TwoPasswordError {
     /// Create an import/export error
     pub fn import_export<S: Into<String>>(msg: S) -> Self {
         Self::ImportExportError(msg.into())
+    }
+
+    /// Create a security error
+    pub fn security<S: Into<String>>(msg: S) -> Self {
+        Self::SecurityError(msg.into())
     }
 }

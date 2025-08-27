@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shield, ArrowLeft, Eye, EyeOff, Save, Trash2 } from "lucide-react";
+import { Shield, ArrowLeft, Save, Trash2 } from "lucide-react";
 
 interface SettingsProps {
   onBack: () => void;

@@ -18,6 +18,7 @@ pub mod analyzer;
 pub mod breach_checker;
 pub mod dashboard;
 pub mod scorer;
+pub mod security_scorer;
 
 /// Password analysis result with detailed feedback
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -336,3 +337,10 @@ impl Default for PasswordHealthService {
 use md5;
 use sha1;
 use sha2::{Sha256, Digest};
+
+// Re-export security scorer types
+pub use security_scorer::{
+    SecurityScorer, PasswordSecurityAssessment, SecurityIssue, VaultSecurityMetrics,
+    SecurityDistribution, IssueSummary, EstimatedTime, PriorityAction,
+    ActionType, ActionPriority
+};

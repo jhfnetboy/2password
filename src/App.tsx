@@ -6,6 +6,7 @@ import PasswordList from "./components/PasswordList";
 import AddPasswordModal from "./components/AddPasswordModal";
 import Sidebar from "./components/Sidebar";
 import Settings from "./components/Settings";
+import PasswordHealthDashboard from "./components/PasswordHealthDashboard";
 import { PasswordEntry } from "./types";
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [touchIdAvailable, setTouchIdAvailable] = useState(false);
-  const [currentView, setCurrentView] = useState<'passwords' | 'settings'>('passwords');
+  const [currentView, setCurrentView] = useState<'passwords' | 'health' | 'settings'>('passwords');
 
   useEffect(() => {
     checkVaultStatus();
@@ -177,6 +178,11 @@ function App() {
               />
             </main>
           </>
+        ) : currentView === 'health' ? (
+          /* Password Health Dashboard */
+          <PasswordHealthDashboard 
+            onBack={() => setCurrentView('passwords')} 
+          />
         ) : (
           /* Settings View */
           <Settings 

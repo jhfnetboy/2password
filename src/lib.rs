@@ -9,6 +9,7 @@ pub mod crypto;
 pub mod error;
 pub mod import_export;
 pub mod password_health;
+pub mod security;
 pub mod storage;
 
 // Re-export common types
