@@ -145,6 +145,12 @@ async fn add_entry(
         );
         let entry_id = entry.id.to_string();
         vault.add_entry(entry);
+        
+        // 自动保存到磁盘
+        vault_manager
+            .save_vault()
+            .map_err(|e| format!("Failed to save vault: {}", e))?;
+        
         Ok(entry_id)
     } else {
         Err("No vault loaded".to_string())
@@ -175,6 +181,12 @@ async fn remove_entry(state: State<'_, AppState>, entry_id: String) -> Result<bo
         vault
             .remove_entry(&id)
             .map_err(|e| format!("Failed to remove entry: {}", e))?;
+        
+        // 自动保存到磁盘
+        vault_manager
+            .save_vault()
+            .map_err(|e| format!("Failed to save vault: {}", e))?;
+            
         Ok(true)
     } else {
         Err("No vault loaded".to_string())

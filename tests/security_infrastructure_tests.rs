@@ -178,7 +178,6 @@ async fn test_integrated_security_workflow() -> Result<()> {
     
     println!("✅ Integrated security workflow completed");
     println!("   Security Violations: {}", metrics.security_violations);
-    println!("   Anomalies Detected: {}", metrics.anomalies_detected);
     Ok(())
 }
 
@@ -205,7 +204,7 @@ async fn test_security_policy_validation() -> Result<()> {
     ];
     
     for level in levels {
-        let is_valid = security_infra.validate_security_context(&context, level);
+        let is_valid = security_infra.validate_security_context(&context, level.clone());
         println!("   Authentication level {:?}: {}", level, if is_valid { "✅ Valid" } else { "❌ Invalid" });
     }
     
