@@ -1,0 +1,429 @@
+/**
+ * TwoPassword Browser Extension - Content Script Styles
+ * Styles for auto-fill buttons, menus, and prompts
+ */
+
+/* Auto-fill button */
+.twopassword-autofill-btn {
+  position: absolute !important;
+  right: 5px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: #4CAF50 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 3px !important;
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  z-index: 10000 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  display: none !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.twopassword-autofill-btn:hover {
+  background: #45a049 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+}
+
+.twopassword-autofill-btn:active {
+  transform: translateY(-50%) scale(0.95) !important;
+}
+
+/* Field wrapper */
+.twopassword-field-wrapper {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+/* Auto-fill menu */
+.twopassword-autofill-menu {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  z-index: 10001 !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 14px !important;
+  margin-top: 2px !important;
+}
+
+.twopassword-credential-item {
+  padding: 12px 16px !important;
+  cursor: pointer !important;
+  border-bottom: 1px solid #eee !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  transition: background-color 0.1s ease !important;
+}
+
+.twopassword-credential-item:last-child {
+  border-bottom: none !important;
+}
+
+.twopassword-credential-item:hover {
+  background: #f8f9fa !important;
+}
+
+.twopassword-credential-item:active {
+  background: #e9ecef !important;
+}
+
+.twopassword-credential-item .credential-title {
+  font-weight: 500 !important;
+  color: #212529 !important;
+  margin-bottom: 2px !important;
+}
+
+.twopassword-credential-item .credential-subtitle {
+  font-size: 12px !important;
+  color: #6c757d !important;
+}
+
+.twopassword-credential-item .credential-action {
+  font-size: 12px !important;
+  color: #007bff !important;
+  font-weight: 500 !important;
+}
+
+/* Save credentials prompt */
+.twopassword-save-prompt {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+  z-index: 10002 !important;
+  padding: 20px !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  animation: twopassword-slide-in 0.3s ease !important;
+}
+
+@keyframes twopassword-slide-in {
+  from {
+    transform: translateX(100%) !important;
+    opacity: 0 !important;
+  }
+  to {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+  }
+}
+
+.twopassword-save-prompt h3 {
+  margin: 0 0 8px 0 !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #212529 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.twopassword-save-prompt h3 img {
+  margin-right: 8px !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.twopassword-save-prompt p {
+  margin: 0 0 16px 0 !important;
+  color: #6c757d !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.twopassword-prompt-buttons {
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+}
+
+.twopassword-prompt-buttons button {
+  padding: 8px 16px !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 4px !important;
+  background: white !important;
+  color: #495057 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.1s ease !important;
+  font-family: inherit !important;
+}
+
+.twopassword-prompt-buttons button:hover {
+  background: #f8f9fa !important;
+  border-color: #adb5bd !important;
+}
+
+.twopassword-prompt-buttons button.primary {
+  background: #4CAF50 !important;
+  color: white !important;
+  border-color: #45a049 !important;
+}
+
+.twopassword-prompt-buttons button.primary:hover {
+  background: #45a049 !important;
+  border-color: #3d8b40 !important;
+}
+
+.twopassword-prompt-buttons button:active {
+  transform: translateY(1px) !important;
+}
+
+/* Password generator */
+.twopassword-generator-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0,0,0,0.5) !important;
+  z-index: 10004 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.twopassword-generator-dialog {
+  background: white !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+  padding: 24px !important;
+  min-width: 400px !important;
+  max-width: 90vw !important;
+  animation: twopassword-scale-in 0.2s ease !important;
+}
+
+@keyframes twopassword-scale-in {
+  from {
+    transform: scale(0.9) !important;
+    opacity: 0 !important;
+  }
+  to {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+  }
+}
+
+.twopassword-generator-dialog h3 {
+  margin: 0 0 16px 0 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #212529 !important;
+}
+
+.twopassword-generated-password {
+  background: #f8f9fa !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 4px !important;
+  padding: 12px !important;
+  margin: 16px 0 !important;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+  font-size: 16px !important;
+  word-break: break-all !important;
+  user-select: all !important;
+  position: relative !important;
+}
+
+.twopassword-generator-options {
+  margin: 16px 0 !important;
+}
+
+.twopassword-generator-option {
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 8px !important;
+}
+
+.twopassword-generator-option label {
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  color: #495057 !important;
+}
+
+.twopassword-generator-option input[type="checkbox"] {
+  margin-right: 8px !important;
+  cursor: pointer !important;
+}
+
+.twopassword-generator-option input[type="range"] {
+  flex: 1 !important;
+  margin: 0 8px !important;
+}
+
+.twopassword-generator-actions {
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  margin-top: 20px !important;
+}
+
+.twopassword-generator-actions button {
+  padding: 8px 16px !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 4px !important;
+  background: white !important;
+  color: #495057 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.1s ease !important;
+  font-family: inherit !important;
+}
+
+.twopassword-generator-actions button:hover {
+  background: #f8f9fa !important;
+}
+
+.twopassword-generator-actions button.primary {
+  background: #4CAF50 !important;
+  color: white !important;
+  border-color: #45a049 !important;
+}
+
+.twopassword-generator-actions button.primary:hover {
+  background: #45a049 !important;
+}
+
+/* Notifications */
+.twopassword-notification {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  padding: 12px 16px !important;
+  border-radius: 4px !important;
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  z-index: 10003 !important;
+  max-width: 300px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  animation: twopassword-slide-in 0.3s ease !important;
+}
+
+.twopassword-notification.success {
+  background: #4CAF50 !important;
+}
+
+.twopassword-notification.error {
+  background: #f44336 !important;
+}
+
+.twopassword-notification.warning {
+  background: #ff9800 !important;
+}
+
+.twopassword-notification.info {
+  background: #2196F3 !important;
+}
+
+/* Loading states */
+.twopassword-loading {
+  display: inline-block !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid #f3f3f3 !important;
+  border-top: 2px solid #4CAF50 !important;
+  border-radius: 50% !important;
+  animation: twopassword-spin 1s linear infinite !important;
+}
+
+@keyframes twopassword-spin {
+  0% { transform: rotate(0deg) !important; }
+  100% { transform: rotate(360deg) !important; }
+}
+
+/* Accessibility improvements */
+.twopassword-autofill-btn:focus,
+.twopassword-credential-item:focus,
+.twopassword-prompt-buttons button:focus,
+.twopassword-generator-actions button:focus {
+  outline: 2px solid #4CAF50 !important;
+  outline-offset: 2px !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .twopassword-autofill-menu,
+  .twopassword-save-prompt,
+  .twopassword-generator-dialog {
+    background: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #e2e8f0 !important;
+  }
+  
+  .twopassword-credential-item:hover {
+    background: #4a5568 !important;
+  }
+  
+  .twopassword-generated-password {
+    background: #4a5568 !important;
+    border-color: #718096 !important;
+    color: #e2e8f0 !important;
+  }
+  
+  .twopassword-prompt-buttons button,
+  .twopassword-generator-actions button {
+    background: #4a5568 !important;
+    border-color: #718096 !important;
+    color: #e2e8f0 !important;
+  }
+  
+  .twopassword-prompt-buttons button:hover,
+  .twopassword-generator-actions button:hover {
+    background: #718096 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .twopassword-autofill-btn,
+  .twopassword-prompt-buttons button.primary,
+  .twopassword-generator-actions button.primary {
+    border: 2px solid currentColor !important;
+  }
+  
+  .twopassword-autofill-menu,
+  .twopassword-save-prompt,
+  .twopassword-generator-dialog {
+    border-width: 2px !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .twopassword-autofill-btn,
+  .twopassword-credential-item,
+  .twopassword-prompt-buttons button,
+  .twopassword-generator-actions button,
+  .twopassword-save-prompt,
+  .twopassword-notification,
+  .twopassword-generator-dialog {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .twopassword-loading {
+    animation: none !important;
+    border-top-color: transparent !important;
+  }
+}

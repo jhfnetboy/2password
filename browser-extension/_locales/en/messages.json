@@ -1,0 +1,70 @@
+{
+  "appName": {
+    "message": "TwoPassword",
+    "description": "The application name"
+  },
+  "appDescription": {
+    "message": "A secure password manager with Touch ID integration and advanced security features",
+    "description": "The application description"
+  },
+  "unlock": {
+    "message": "Unlock",
+    "description": "Button text to unlock the vault"
+  },
+  "unlockWithTouchID": {
+    "message": "Unlock with Touch ID",
+    "description": "Button text to unlock with Touch ID"
+  },
+  "unlockWithPassword": {
+    "message": "Unlock with Password", 
+    "description": "Button text to unlock with password"
+  },
+  "searchPasswords": {
+    "message": "Search passwords...",
+    "description": "Placeholder text for search input"
+  },
+  "addPassword": {
+    "message": "Add Password",
+    "description": "Button text to add a new password"
+  },
+  "generatePassword": {
+    "message": "Generate",
+    "description": "Button text to generate a password"
+  },
+  "currentSite": {
+    "message": "Current Site", 
+    "description": "Button text for current site passwords"
+  },
+  "securityDashboard": {
+    "message": "Security Dashboard",
+    "description": "Button text for security dashboard"
+  },
+  "vaultLocked": {
+    "message": "Vault Locked",
+    "description": "Status text when vault is locked"
+  },
+  "vaultUnlocked": {
+    "message": "Vault Unlocked", 
+    "description": "Status text when vault is unlocked"
+  },
+  "noPasswordsFound": {
+    "message": "No passwords found",
+    "description": "Text shown when no passwords match search"
+  },
+  "loadingPasswords": {
+    "message": "Loading passwords...",
+    "description": "Text shown while loading passwords"
+  },
+  "connectionError": {
+    "message": "Connection Error",
+    "description": "Title for connection error"
+  },
+  "connectionErrorMessage": {
+    "message": "Unable to connect to TwoPassword application. Please make sure the native app is installed and running.",
+    "description": "Error message for connection issues"
+  },
+  "retryConnection": {
+    "message": "Retry Connection",
+    "description": "Button text to retry connection"
+  }
+}
