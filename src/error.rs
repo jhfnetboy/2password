@@ -40,6 +40,9 @@ pub enum TwoPasswordError {
 
     #[error("Validation error: {0}")]
     ValidationError(String),
+
+    #[error("Import/Export error: {0}")]
+    ImportExportError(String),
 }
 
 /// Convenience result type
@@ -74,5 +77,10 @@ impl TwoPasswordError {
     /// Create a Touch ID error
     pub fn touch_id<S: Into<String>>(msg: S) -> Self {
         Self::TouchIdError(msg.into())
+    }
+
+    /// Create an import/export error
+    pub fn import_export<S: Into<String>>(msg: S) -> Self {
+        Self::ImportExportError(msg.into())
     }
 }

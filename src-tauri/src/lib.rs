@@ -4,17 +4,20 @@ use tauri::State;
 
 // Import 2Password core functionality
 use twopassword::storage::{VaultManager, PasswordEntry, SearchOptions};
+use twopassword::import_export::{ImportExportService, ImportFormat, ImportResult, ExportOptions};
 use twopassword::auth::touchid;
 
 // Application state that will be shared across Tauri commands  
 pub struct AppState {
     vault_manager: Mutex<VaultManager>,
+    import_export: Mutex<ImportExportService>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             vault_manager: Mutex::new(VaultManager::new()),
+            import_export: Mutex::new(ImportExportService::new()),
         }
     }
 }
@@ -244,6 +247,190 @@ async fn generate_password(
     .map_err(|e| format!("Failed to generate password: {}", e))
 }
 
+// Import/Export commands
+
+// Detect file format
+#[tauri::command]
+async fn detect_import_format(
+    state: State<'_, AppState>,
+    filename: String,
+    content: String,
+) -> Result<String, String> {
+    let import_export = state
+        .import_export
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    match import_export.detect_format(&filename, &content) {
+        Ok(format) => Ok(format!("{:?}", format)),
+        Err(e) => Err(format!("Format detection failed: {}", e)),
+    }
+}
+
+// Import passwords from file
+#[derive(serde::Deserialize)]
+struct ImportRequest {
+    content: String,
+    format: String,
+    duplicate_check: bool,
+}
+
+#[tauri::command]
+async fn import_passwords(
+    state: State<'_, AppState>,
+    request: ImportRequest,
+) -> Result<serde_json::Value, String> {
+    let mut vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+    let import_export = state
+        .import_export
+        .lock()
+        .map_err(|e| format!("Failed to acquire import lock: {}", e))?;
+
+    if let Some(vault) = vault_manager.get_vault() {
+        // Parse format
+        let format = match request.format.as_str() {
+            "CSV" => ImportFormat::CSV,
+            "LastPass" => ImportFormat::LastPass,
+            "Chrome" => ImportFormat::Chrome,
+            "Bitwarden" => ImportFormat::Bitwarden,
+            "Firefox" => ImportFormat::Firefox,
+            "OnePassword" => ImportFormat::OnePassword,
+            _ => return Err(format!("Unsupported format: {}", request.format)),
+        };
+
+        // Get existing entries for duplicate check
+        let existing_entries: Vec<PasswordEntry> = vault.get_all_entries().into_iter().cloned().collect();
+        
+        // Import passwords
+        match import_export.import_passwords(&request.content, format, &existing_entries) {
+            Ok((entries, result)) => {
+                // Add entries to vault if successful
+                if !entries.is_empty() {
+                    drop(import_export); // Release lock before modifying vault
+                    if let Some(vault) = vault_manager.get_vault_mut() {
+                        for entry in entries {
+                            vault.add_entry(entry);
+                        }
+                    }
+                }
+                
+                Ok(serde_json::to_value(result)
+                    .map_err(|e| format!("Failed to serialize result: {}", e))?)
+            }
+            Err(e) => Err(format!("Import failed: {}", e)),
+        }
+    } else {
+        Err("No vault loaded".to_string())
+    }
+}
+
+// Export passwords to specified format
+#[derive(serde::Deserialize)]
+struct ExportRequest {
+    format: String,
+    include_passwords: bool,
+    include_notes: bool,
+    include_tags: bool,
+    include_metadata: bool,
+}
+
+#[tauri::command]
+async fn export_passwords(
+    state: State<'_, AppState>,
+    request: ExportRequest,
+) -> Result<String, String> {
+    let vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire vault lock: {}", e))?;
+
+    let import_export = state
+        .import_export
+        .lock()
+        .map_err(|e| format!("Failed to acquire export lock: {}", e))?;
+
+    if let Some(vault) = vault_manager.get_vault() {
+        // Parse format
+        let format = match request.format.as_str() {
+            "CSV" => ImportFormat::CSV,
+            "Bitwarden" => ImportFormat::Bitwarden,
+            _ => return Err(format!("Unsupported export format: {}", request.format)),
+        };
+
+        let options = ExportOptions {
+            format,
+            include_passwords: request.include_passwords,
+            include_notes: request.include_notes,
+            include_tags: request.include_tags,
+            include_metadata: request.include_metadata,
+        };
+
+        let entries: Vec<PasswordEntry> = vault.get_all_entries().into_iter().cloned().collect();
+        
+        match import_export.export_passwords(&entries, &options) {
+            Ok(exported_data) => Ok(exported_data),
+            Err(e) => Err(format!("Export failed: {}", e)),
+        }
+    } else {
+        Err("No vault loaded".to_string())
+    }
+}
+
+// Get supported import formats
+#[tauri::command]
+async fn get_supported_formats() -> Result<Vec<serde_json::Value>, String> {
+    let formats = vec![
+        serde_json::json!({
+            "name": "CSV",
+            "description": "Generic CSV format",
+            "extensions": ["csv"],
+            "import": true,
+            "export": true
+        }),
+        serde_json::json!({
+            "name": "LastPass",
+            "description": "LastPass CSV export",
+            "extensions": ["csv"],
+            "import": true,
+            "export": false
+        }),
+        serde_json::json!({
+            "name": "Chrome",
+            "description": "Chrome passwords CSV",
+            "extensions": ["csv"],
+            "import": true,
+            "export": false
+        }),
+        serde_json::json!({
+            "name": "Bitwarden",
+            "description": "Bitwarden JSON export",
+            "extensions": ["json"],
+            "import": true,
+            "export": true
+        }),
+        serde_json::json!({
+            "name": "Firefox",
+            "description": "Firefox JSON export",
+            "extensions": ["json"],
+            "import": true,
+            "export": false
+        }),
+        serde_json::json!({
+            "name": "OnePassword",
+            "description": "1Password export (basic)",
+            "extensions": ["1pif", "csv"],
+            "import": true,
+            "export": false
+        }),
+    ];
+
+    Ok(formats)
+}
+
 // Advanced search command
 #[derive(serde::Deserialize)]
 struct AdvancedSearchRequest {
@@ -386,6 +573,10 @@ pub fn run() {
             save_vault,
             close_vault,
             generate_password,
+            detect_import_format,
+            import_passwords,
+            export_passwords,
+            get_supported_formats,
             check_touchid_available,
             authenticate_touchid
         ])
