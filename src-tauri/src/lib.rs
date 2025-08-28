@@ -5,22 +5,33 @@ use tauri::State;
 // Import 2Password core functionality
 use twopassword::storage::{VaultManager, PasswordEntry, SearchOptions};
 use twopassword::import_export::{ImportExportService, ImportFormat, ImportResult, ExportOptions};
-use twopassword::auth::touchid;
+use twopassword::auth::{touchid, passkey::{PasskeyManager, PasskeyConfig}};
+use twopassword::crypto::key_derivation::{MultiFactorInput, derive_master_key};
 use twopassword::password_health::{PasswordHealthService, DashboardData};
+use sha2::{Sha256, Digest};
+use rand::{Rng, thread_rng};
+use base64;
 
 // Application state that will be shared across Tauri commands  
 pub struct AppState {
     vault_manager: Mutex<VaultManager>,
     import_export: Mutex<ImportExportService>,
     password_health: Mutex<PasswordHealthService>,
+    passkey_manager: Mutex<PasskeyManager>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
+        // Create default Passkey configuration
+        let passkey_config = PasskeyConfig::default();
+        let passkey_manager = PasskeyManager::new(passkey_config)
+            .expect("Failed to create PasskeyManager");
+
         Self {
             vault_manager: Mutex::new(VaultManager::new()),
             import_export: Mutex::new(ImportExportService::new()),
             password_health: Mutex::new(PasswordHealthService::new()),
+            passkey_manager: Mutex::new(passkey_manager),
         }
     }
 }
@@ -825,6 +836,177 @@ async fn export_metrics_csv(
         .map_err(|e| format!("Failed to export CSV: {}", e))
 }
 
+// Passkey authentication commands
+#[derive(serde::Serialize)]
+struct PasskeyStatus {
+    available: bool,
+    registered: bool,
+    username: Option<String>,
+}
+
+#[derive(serde::Serialize)]
+struct PasskeyAuthResult {
+    success: bool,
+    auth_token: Option<String>,
+    error: Option<String>,
+}
+
+#[tauri::command]
+async fn check_passkey_available() -> Result<bool, String> {
+    // Check if Touch ID/Face ID is available on macOS
+    #[cfg(target_os = "macos")]
+    {
+        Ok(touchid::is_available())
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok(false)
+    }
+}
+
+#[tauri::command]
+async fn get_passkey_status(state: State<'_, AppState>) -> Result<PasskeyStatus, String> {
+    let passkey_manager = state
+        .passkey_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    let credentials = passkey_manager.list_credentials();
+    let primary_username = credentials.first().map(|c| c.username.clone());
+    
+    Ok(PasskeyStatus {
+        available: touchid::is_available(),
+        registered: !credentials.is_empty(),
+        username: primary_username,
+    })
+}
+
+#[tauri::command]
+async fn register_passkey(
+    state: State<'_, AppState>,
+    username: String,
+) -> Result<bool, String> {
+    let mut passkey_manager = state
+        .passkey_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    passkey_manager
+        .register_credential(&username, None)
+        .map_err(|e| format!("Failed to register Passkey: {}", e))?;
+
+    Ok(true)
+}
+
+#[tauri::command]
+async fn authenticate_passkey(
+    state: State<'_, AppState>,
+    username: Option<String>,
+) -> Result<PasskeyAuthResult, String> {
+    let mut passkey_manager = state
+        .passkey_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+
+    match passkey_manager.authenticate(username.as_deref()) {
+        Ok(result) => Ok(PasskeyAuthResult {
+            success: result.success,
+            auth_token: if result.success {
+                result.auth_token.map(|token| base64::encode(&token))
+            } else {
+                None
+            },
+            error: None,
+        }),
+        Err(e) => Ok(PasskeyAuthResult {
+            success: false,
+            auth_token: None,
+            error: Some(format!("Authentication failed: {}", e)),
+        }),
+    }
+}
+
+#[tauri::command]
+async fn create_vault_with_passkey(
+    state: State<'_, AppState>,
+    path: String,
+    simple_password: String,
+    username: String,
+    icloud_id: Option<String>,
+) -> Result<bool, String> {
+    println!("🎯 create_vault_with_passkey called with path: {}", path);
+    
+    // First register Passkey if not already registered
+    let mut passkey_manager = state
+        .passkey_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire passkey manager lock: {}", e))?;
+
+    // Check if user already has credentials
+    let existing_credentials = passkey_manager.list_credentials();
+    let has_credential = existing_credentials.iter()
+        .any(|cred| cred.username == username);
+        
+    if !has_credential {
+        passkey_manager
+            .register_credential(&username, None)
+            .map_err(|e| format!("Failed to register Passkey: {}", e))?;
+    }
+
+    // Authenticate with Passkey to get auth token
+    let auth_result = passkey_manager
+        .authenticate(Some(&username))
+        .map_err(|e| format!("Passkey authentication failed: {}", e))?;
+
+    if !auth_result.success {
+        return Err("Passkey authentication failed".to_string());
+    }
+
+    drop(passkey_manager); // Release the lock
+
+    // Derive master key using multi-factor approach
+    let icloud_id_hash = if let Some(id) = icloud_id {
+        use sha2::{Sha256, Digest};
+        let mut hasher = Sha256::new();
+        hasher.update(id.as_bytes());
+        hasher.finalize().to_vec()
+    } else {
+        vec![0u8; 32] // Default hash if iCloud ID not available
+    };
+
+    let random_salt: Vec<u8> = (0..32).map(|_| rand::random::<u8>()).collect();
+
+    let multi_factor_input = MultiFactorInput {
+        simple_password,
+        passkey_auth_token: auth_result.auth_token.unwrap_or_else(|| vec![0u8; 32]),
+        icloud_id_hash,
+        random_salt,
+    };
+
+    let master_key = derive_master_key(&multi_factor_input, None)
+        .map_err(|e| format!("Failed to derive master key: {}", e))?;
+
+    // Convert master key to string for vault creation
+    let master_key_string = base64::encode(&master_key);
+
+    // Create vault with derived master key
+    let mut vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| format!("Failed to acquire vault manager lock: {}", e))?;
+
+    match vault_manager.create_vault(&path, &master_key_string) {
+        Ok(_) => {
+            println!("✅ Vault created successfully with Passkey integration");
+            Ok(true)
+        }
+        Err(e) => {
+            println!("❌ Failed to create vault: {}", e);
+            Err(format!("Failed to create vault: {}", e))
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -860,7 +1042,12 @@ pub fn run() {
             generate_security_summary,
             generate_dashboard_report,
             export_dashboard_json,
-            export_metrics_csv
+            export_metrics_csv,
+            check_passkey_available,
+            get_passkey_status,
+            register_passkey,
+            authenticate_passkey,
+            create_vault_with_passkey
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

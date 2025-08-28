@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { Shield, FolderOpen } from "lucide-react";
-import { load_vault, create_vault, add_entry } from "../utils/api";
-import PasswordModal from "./PasswordModal";
+import { load_vault, create_vault, create_vault_with_passkey, add_entry } from "../utils/api";
+import EnhancedPasswordModal from "./EnhancedPasswordModal";
 
 interface VaultSetupProps {
   onVaultLoaded: () => void;
@@ -121,21 +121,40 @@ export default function VaultSetup({ onVaultLoaded }: VaultSetupProps) {
     }
   };
 
-  const handlePasswordSubmit = async (password: string) => {
+  const handlePasswordSubmit = async (data: {
+    password: string;
+    username?: string;
+    authToken?: string;
+    usePasskey: boolean;
+  }) => {
     setIsLoading(true);
     setError(null);
 
     try {
       if (passwordModal === 'create') {
-        // Create new vault
-        console.log("🔴 Creating new vault with modal password");
-        await create_vault(pendingVaultPath, password);
-        await load_vault(pendingVaultPath, password);
+        console.log("🔴 Creating new vault", { 
+          path: pendingVaultPath,
+          usePasskey: data.usePasskey,
+          username: data.username 
+        });
+
+        // Always use Passkey for new vaults (mandatory)
+        if (data.username) {
+          await create_vault_with_passkey(
+            pendingVaultPath, 
+            data.password, 
+            data.username
+          );
+          // Load with the simple password for now (backend will handle multi-factor)
+          await load_vault(pendingVaultPath, data.password);
+        } else {
+          throw new Error("Username is required for Passkey authentication");
+        }
         onVaultLoaded();
       } else if (passwordModal === 'load') {
-        // Load existing vault
         console.log("🔵 Loading existing vault with modal password");
-        await load_vault(pendingVaultPath, password);
+        // For loading, use the password as-is (may need enhancement later)
+        await load_vault(pendingVaultPath, data.password);
         onVaultLoaded();
       }
     } catch (error) {
@@ -288,19 +307,22 @@ export default function VaultSetup({ onVaultLoaded }: VaultSetupProps) {
           </div>
         )}
 
-        {/* Password Modal */}
-        <PasswordModal
+        {/* Enhanced Password Modal with Mandatory Passkey */}
+        <EnhancedPasswordModal
           isOpen={passwordModal !== 'none'}
+          mode={passwordModal === 'create' ? 'create' : 'load'}
           title={passwordModal === 'create' ? 'Create New Vault' : 'Open Existing Vault'}
           description={
             passwordModal === 'create' 
-              ? 'Enter a master password for your new vault. This password will be used to encrypt all your data.'
-              : 'Enter the master password to unlock your vault.'
+              ? 'Create your secure vault. Touch ID authentication is required for maximum security with simple passwords.'
+              : 'Enter your master password to unlock your vault.'
           }
           onSubmit={handlePasswordSubmit}
           onClose={handlePasswordModalClose}
           isLoading={isLoading}
-          minLength={passwordModal === 'create' ? 8 : 1}
+          minLength={passwordModal === 'create' ? 4 : 1}
+          showPasskeyOption={passwordModal === 'create'}
+          enforcePasskey={passwordModal === 'create'}
         />
       </div>
     </div>

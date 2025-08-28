@@ -18,6 +18,20 @@ export class TauriAPIClient implements TauriAPI {
   async create_vault(path: string, password: string): Promise<boolean> {
     return await invoke('create_vault', { path, password });
   }
+
+  async create_vault_with_passkey(
+    path: string, 
+    simplePassword: string, 
+    username: string,
+    icloudId?: string
+  ): Promise<boolean> {
+    return await invoke('create_vault_with_passkey', { 
+      path, 
+      simplePassword, 
+      username,
+      icloudId 
+    });
+  }
   
   async load_vault(path: string, password: string): Promise<boolean> {
     return await invoke('load_vault', { path, password });
@@ -112,6 +126,7 @@ export const api = new TauriAPIClient();
 export const {
   greet,
   create_vault,
+  create_vault_with_passkey,
   load_vault,
   get_vault_status,
   save_vault,
