@@ -4,7 +4,7 @@
 echo "🛑 正在停止 2Password 开发服务器..."
 
 # 终止进程
-kill 30963 30992 2>/dev/null || true
+kill 36115 36144 2>/dev/null || true
 
 # 清理端口
 lsof -ti:3000 | xargs kill -9 2>/dev/null || true
