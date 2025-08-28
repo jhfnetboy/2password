@@ -106,11 +106,48 @@ impl CryptoManager {
         aes_gcm::decrypt(key.as_bytes(), encrypted)
     }
 
-    /// Derive master key from password and salt
+    /// Derive master key from password and salt (legacy method)
     pub fn derive_key(&mut self, password: &str, salt: &Salt) -> Result<()> {
         let key_bytes = key_derivation::derive_key(password, &salt.bytes)?;
         self.master_key = Some(MasterKey::from_bytes(key_bytes));
         Ok(())
+    }
+
+    /// Derive master key using multi-factor input
+    /// This is the primary method implementing the 2Password security architecture
+    pub fn derive_multifactor_key(&mut self, input: &key_derivation::MultiFactorInput) -> Result<()> {
+        let key_bytes = key_derivation::derive_master_key(input, None)?;
+        self.master_key = Some(MasterKey::from_bytes(key_bytes));
+        tracing::info!("Multi-factor master key derived and set");
+        Ok(())
+    }
+
+    /// Create multi-factor input for key derivation
+    pub fn create_multifactor_input(
+        simple_password: String,
+        passkey_auth_token: Vec<u8>,
+        icloud_id_hash: Vec<u8>,
+    ) -> Result<key_derivation::MultiFactorInput> {
+        key_derivation::create_multifactor_input(
+            simple_password,
+            passkey_auth_token,
+            icloud_id_hash,
+        )
+    }
+
+    /// Create multi-factor input with existing salt (for vault loading)
+    pub fn create_multifactor_input_with_salt(
+        simple_password: String,
+        passkey_auth_token: Vec<u8>,
+        icloud_id_hash: Vec<u8>,
+        random_salt: Vec<u8>,
+    ) -> key_derivation::MultiFactorInput {
+        key_derivation::create_multifactor_input_with_salt(
+            simple_password,
+            passkey_auth_token,
+            icloud_id_hash,
+            random_salt,
+        )
     }
 }
 

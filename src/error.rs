@@ -29,6 +29,9 @@ pub enum TwoPasswordError {
     #[error("Touch ID not available or failed")]
     TouchIdError(String),
 
+    #[error("Passkey/WebAuthn error: {0}")]
+    PasskeyError(String),
+
     #[error("IO operation failed: {0}")]
     IoError(#[from] std::io::Error),
 
@@ -90,5 +93,10 @@ impl TwoPasswordError {
     /// Create a security error
     pub fn security<S: Into<String>>(msg: S) -> Self {
         Self::SecurityError(msg.into())
+    }
+
+    /// Create a Passkey error
+    pub fn passkey<S: Into<String>>(msg: S) -> Self {
+        Self::PasskeyError(msg.into())
     }
 }

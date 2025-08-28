@@ -74,6 +74,9 @@ md5 = "0.7"
 sha1 = "0.10"
 sha2 = "0.10"
 
+# System information
+whoami = "1.4"
+
 [dev-dependencies]
 # Testing framework
 tokio-test = "0.4"
