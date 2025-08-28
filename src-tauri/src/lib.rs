@@ -44,16 +44,29 @@ async fn create_vault(
     path: String,
     password: String,
 ) -> Result<bool, String> {
+    println!("🎯 create_vault command called with path: {}", path);
+    println!("🔑 password length: {}", password.len());
+    
     let mut vault_manager = state
         .vault_manager
         .lock()
-        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+        .map_err(|e| {
+            println!("❌ Failed to acquire lock: {}", e);
+            format!("Failed to acquire lock: {}", e)
+        })?;
 
-    vault_manager
-        .create_vault(&path, &password)
-        .map_err(|e| format!("Failed to create vault: {}", e))?;
-
-    Ok(true)
+    println!("🔒 Successfully acquired vault manager lock");
+    
+    match vault_manager.create_vault(&path, &password) {
+        Ok(_) => {
+            println!("✅ Vault created successfully");
+            Ok(true)
+        }
+        Err(e) => {
+            println!("❌ Failed to create vault: {}", e);
+            Err(format!("Failed to create vault: {}", e))
+        }
+    }
 }
 
 #[tauri::command]
@@ -75,15 +88,51 @@ async fn load_vault(
 }
 
 #[tauri::command]
+async fn close_vault(state: State<'_, AppState>) -> Result<bool, String> {
+    println!("🔓 close_vault command called");
+    
+    let mut vault_manager = state
+        .vault_manager
+        .lock()
+        .map_err(|e| {
+            println!("❌ Failed to acquire lock: {}", e);
+            format!("Failed to acquire lock: {}", e)
+        })?;
+
+    println!("🔒 Successfully acquired vault manager lock");
+    
+    // Save current vault before closing if it exists
+    if vault_manager.is_vault_loaded() {
+        println!("💾 Saving current vault before closing...");
+        match vault_manager.save_vault() {
+            Ok(_) => println!("✅ Vault saved successfully"),
+            Err(e) => println!("⚠️ Warning: Failed to save vault: {}", e),
+        }
+    }
+    
+    // Close the vault
+    vault_manager.close_vault();
+    println!("✅ Vault closed successfully");
+    
+    Ok(true)
+}
+
+#[tauri::command]
 async fn get_vault_status(state: State<'_, AppState>) -> Result<VaultStatus, String> {
     let vault_manager = state
         .vault_manager
         .lock()
         .map_err(|e| format!("Failed to acquire lock: {}", e))?;
 
+    let vault_path = if vault_manager.is_vault_loaded() {
+        vault_manager.get_vault_path()
+    } else {
+        None
+    };
+
     Ok(VaultStatus {
         loaded: vault_manager.is_vault_loaded(),
-        path: None, // TODO: Add path tracking
+        path: vault_path,
     })
 }
 
@@ -129,12 +178,27 @@ async fn add_entry(
     notes: Option<String>,
     tags: Option<Vec<String>>,
 ) -> Result<String, String> {
+    println!("🎯 add_entry command called with:");
+    println!("   📝 title: {}", title);
+    println!("   👤 username: {}", username);
+    println!("   🔑 password: [PROTECTED {} chars]", password.len());
+    println!("   🌐 url: {:?}", url);
+    println!("   📄 notes: {:?}", notes.as_ref().map(|s| format!("{} chars", s.len())));
+    println!("   🏷️ tags: {:?}", tags);
+    
+    println!("🔐 Acquiring vault manager lock...");
     let mut vault_manager = state
         .vault_manager
         .lock()
-        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
+        .map_err(|e| {
+            let error = format!("Failed to acquire lock: {}", e);
+            println!("❌ Lock acquisition failed: {}", error);
+            error
+        })?;
+    println!("✅ Vault manager lock acquired");
 
     if let Some(vault) = vault_manager.get_vault_mut() {
+        println!("✅ Vault is loaded, creating new entry...");
         let entry = PasswordEntry::new_with_fields(
             title, 
             username, 
@@ -144,16 +208,29 @@ async fn add_entry(
             tags.unwrap_or_default()
         );
         let entry_id = entry.id.to_string();
-        vault.add_entry(entry);
+        println!("✅ Created entry with ID: {}", entry_id);
         
+        println!("💾 Adding entry to vault...");
+        vault.add_entry(entry);
+        println!("✅ Entry added to vault");
+        
+        println!("💽 Saving vault to disk...");
         // 自动保存到磁盘
         vault_manager
             .save_vault()
-            .map_err(|e| format!("Failed to save vault: {}", e))?;
+            .map_err(|e| {
+                let error = format!("Failed to save vault: {}", e);
+                println!("❌ Vault save failed: {}", error);
+                error
+            })?;
+        println!("✅ Vault saved to disk");
         
+        println!("🎉 add_entry completed successfully, returning ID: {}", entry_id);
         Ok(entry_id)
     } else {
-        Err("No vault loaded".to_string())
+        let error = "No vault loaded".to_string();
+        println!("❌ {}", error);
+        Err(error)
     }
 }
 
@@ -230,16 +307,6 @@ async fn save_vault(state: State<'_, AppState>) -> Result<bool, String> {
     Ok(true)
 }
 
-#[tauri::command]
-async fn close_vault(state: State<'_, AppState>) -> Result<bool, String> {
-    let mut vault_manager = state
-        .vault_manager
-        .lock()
-        .map_err(|e| format!("Failed to acquire lock: {}", e))?;
-
-    vault_manager.close_vault();
-    Ok(true)
-}
 
 // Generate secure password
 #[tauri::command]
@@ -762,6 +829,7 @@ async fn export_metrics_csv(
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
             greet,

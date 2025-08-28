@@ -56,19 +56,36 @@ export default function AddPasswordModal({ onAdd, onClose }: AddPasswordModalPro
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log("🚀 AddPasswordModal: Form submission started");
+    console.log("📝 Form data:", {
+      title: formData.title,
+      username: formData.username,
+      password: formData.password ? "[PROTECTED]" : "(empty)",
+      url: formData.url,
+      notes: formData.notes,
+      tags: tags
+    });
+    
     if (!formData.title.trim() || !formData.username.trim() || !formData.password.trim()) {
+      console.error("❌ Validation failed: Missing required fields");
       alert("Please fill in title, username, and password fields.");
       return;
     }
 
-    onAdd(
-      formData.title.trim(),
-      formData.username.trim(),
-      formData.password.trim(),
-      formData.url.trim() || undefined,
-      formData.notes.trim() || undefined,
-      tags.length > 0 ? tags : undefined
-    );
+    console.log("✅ Validation passed, calling onAdd callback");
+    try {
+      onAdd(
+        formData.title.trim(),
+        formData.username.trim(),
+        formData.password.trim(),
+        formData.url.trim() || undefined,
+        formData.notes.trim() || undefined,
+        tags.length > 0 ? tags : undefined
+      );
+      console.log("✅ onAdd callback completed successfully");
+    } catch (error) {
+      console.error("❌ Error in onAdd callback:", error);
+    }
   };
 
   return (

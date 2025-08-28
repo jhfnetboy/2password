@@ -251,6 +251,11 @@ impl AuditLogger {
         Ok(files)
     }
     
+    /// Flush all buffered entries to disk
+    pub async fn flush(&mut self) -> Result<()> {
+        self.flush_buffer().await
+    }
+    
     /// Get audit statistics
     pub async fn get_statistics(&self) -> Result<AuditStatistics> {
         let mut stats = AuditStatistics {

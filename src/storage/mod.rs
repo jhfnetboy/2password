@@ -322,6 +322,11 @@ impl VaultManager {
         self.current_vault.is_some()
     }
 
+    /// Get the current vault path
+    pub fn get_vault_path(&self) -> Option<String> {
+        self.current_vault.as_ref().map(|vault| vault.vault_path.to_string_lossy().to_string())
+    }
+
     /// Close the current vault
     pub fn close_vault(&mut self) {
         self.current_vault = None;

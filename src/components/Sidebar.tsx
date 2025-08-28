@@ -3,8 +3,8 @@ import { Shield, Plus, Settings, Lock, Fingerprint, BarChart3 } from "lucide-rea
 interface SidebarProps {
   touchIdAvailable: boolean;
   onNewEntry: () => void;
-  onNavigate: (view: 'passwords' | 'health' | 'settings') => void;
-  currentView: 'passwords' | 'health' | 'settings';
+  onNavigate: (view: 'passwords' | 'health' | 'settings' | 'security') => void;
+  currentView: 'passwords' | 'health' | 'settings' | 'security';
 }
 
 export default function Sidebar({ touchIdAvailable, onNewEntry, onNavigate, currentView }: SidebarProps) {
@@ -73,7 +73,14 @@ export default function Sidebar({ touchIdAvailable, onNewEntry, onNavigate, curr
             Settings
           </button>
           
-          <button className="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+          <button 
+            onClick={() => onNavigate('security')}
+            className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              currentView === 'security' 
+                ? 'text-gray-900 bg-gray-100' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
             <Lock className="h-4 w-4 mr-3" />
             Security
           </button>

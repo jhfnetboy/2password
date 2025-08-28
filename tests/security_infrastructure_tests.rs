@@ -40,6 +40,9 @@ async fn test_audit_logger_functionality() -> Result<()> {
     
     audit_logger.log_event(&event).await?;
     
+    // Force flush buffer to disk so statistics can read it
+    audit_logger.flush().await?;
+    
     let stats = audit_logger.get_statistics().await?;
     assert_eq!(stats.total_events, 1);
     assert_eq!(stats.successful_logins, 1);
