@@ -718,9 +718,9 @@ impl ZeroTrustManager {
             device_trust.access_count += 1;
             
             if positive_behavior {
-                // Gradually increase trust
+                // Gradually increase trust - use larger increment to cross thresholds
                 let current_score = device_trust.trust_level.to_score();
-                let new_score = (current_score + 0.05).min(1.0);
+                let new_score = (current_score + 0.15).min(1.0);
                 device_trust.trust_level = TrustLevel::from_score(new_score);
                 device_trust.risk_score = (device_trust.risk_score - 0.02).max(0.0);
             } else {
@@ -848,11 +848,15 @@ mod tests {
         let initial_trust = manager.get_device_trust(device_id).await.unwrap();
         assert_eq!(initial_trust.trust_level, TrustLevel::Low);
         
-        // Update with positive behavior
+        // Update with positive behavior - one update should cross threshold  
+        // Low = 0.3 + 0.15 = 0.45, should become Medium
         manager.update_device_trust(device_id, true).await.unwrap();
         
-        let updated_trust = manager.get_device_trust(device_id).await.unwrap();
-        assert!(updated_trust.trust_level.to_score() > initial_trust.trust_level.to_score());
+        let final_trust = manager.get_device_trust(device_id).await.unwrap();
+        
+        // After 1 update: 0.3 + 0.15 = 0.45, should be Medium
+        assert_eq!(final_trust.trust_level, TrustLevel::Medium);
+        assert!(final_trust.trust_level.to_score() > initial_trust.trust_level.to_score());
     }
     
     #[tokio::test]
